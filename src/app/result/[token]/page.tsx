@@ -9,18 +9,32 @@ import { CountUp } from "@/components/result/CountUp";
 import { IncomeBars, ScoreGauge, TraitRadar } from "@/components/result/Charts";
 import { InterviewCta } from "@/components/result/InterviewCta";
 import { getLeadByToken } from "@/lib/leads";
-import { RANK_LABEL, type DiagnosisResult } from "@/lib/engine";
+import { RANK_LABEL, diagnose, type DiagnosisResult } from "@/lib/engine";
+import { decodePreviewToken, isPreviewMode, isPreviewToken } from "@/lib/preview";
+
+type View = { token: string; name: string; phone: string; requested: boolean; result: DiagnosisResult };
+
+async function loadView(token: string): Promise<View | null> {
+  if (isPreviewToken(token)) {
+    const p = decodePreviewToken(token);
+    return p ? { token, name: p.name, phone: "", requested: false, result: diagnose(p.answers) } : null;
+  }
+  if (isPreviewMode()) return null;
+  const lead = await getLeadByToken(token);
+  if (!lead) return null;
+  return { token: lead.token, name: lead.name, phone: lead.phone, requested: Boolean(lead.interviewRequestedAt), result: lead.result as DiagnosisResult };
+}
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "診断結果", robots: { index: false, follow: false } };
 
 export default async function ResultPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const lead = await getLeadByToken(token);
+  const lead = await loadView(token);
   if (!lead) notFound();
-  const r = lead.result as DiagnosisResult;
-  const firstName = lead.name.split(/[\s　]/)[0] || lead.name;
-  const requested = Boolean(lead.interviewRequestedAt);
+  const r = lead.result;
+  const firstName = lead.name.split(/[\s　]/)[0] || lead.name || "あなた";
+  const requested = lead.requested;
 
   return (
     <>

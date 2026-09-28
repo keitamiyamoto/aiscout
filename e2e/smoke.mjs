@@ -131,7 +131,7 @@ await page.click("text=診断結果を見る");
 await page.waitForSelector("text=ひらがな・カタカナで入力");
 ok("kana + phone validation", (await page.locator("text=電話番号が正しくありません").count()) > 0);
 await page.fill('input[name="nameKana"]', "やまだ たろう");
-await page.fill('input[name="phone"]', "090-1234-5678");
+await page.fill('input[name="phone"]', `090-${String(Date.now()).slice(-8, -4)}-${String(Date.now()).slice(-4)}`);
 await page.click("text=診断結果を見る");
 await page.waitForSelector("text=診断しています", { timeout: 5000 });
 ok("analyzing overlay", true);

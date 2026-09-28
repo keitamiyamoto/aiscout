@@ -8,6 +8,7 @@ import { normalizePhone } from "@/lib/validate";
 import { countRecentByPhone, createLead, getLeadByToken, markSheetSync, requestInterview } from "@/lib/leads";
 import { appendSheetRow } from "@/lib/sheets";
 import { leadRow } from "@/lib/lead-columns";
+import { encodePreviewToken, isPreviewMode, isPreviewToken } from "@/lib/preview";
 
 export type SubmitResult =
   | { ok: true; token: string }
@@ -31,6 +32,9 @@ export async function submitDiagnosisAction(answersInput: unknown, contactInput:
     return { ok: false, error: "入力内容をご確認ください", fieldErrors: toFieldErrors(contact.error) };
   }
 
+  // プレビューモード (DB 未設定): 保存せず、回答を結果URLに入れて返す
+  if (isPreviewMode()) return { ok: true, token: encodePreviewToken(answers.data, contact.data.name) };
+
   if ((await countRecentByPhone(contact.data.phone)) >= MAX_PER_PHONE_PER_HOUR) {
     return { ok: false, error: "短時間に何度も送信されています。しばらく時間をおいてからお試しください。" };
   }
@@ -48,6 +52,10 @@ export async function submitDiagnosisAction(answersInput: unknown, contactInput:
 export type InterviewResult = { ok: true } | { ok: false; error: string; fieldErrors?: Record<string, string> };
 
 export async function requestInterviewAction(token: string, input: unknown): Promise<InterviewResult> {
+  if (isPreviewToken(token)) {
+    const parsed = interviewSchema.safeParse(input);
+    return parsed.success ? { ok: true } : { ok: false, error: "入力内容をご確認ください", fieldErrors: toFieldErrors(parsed.error) };
+  }
   const lead = await getLeadByToken(token);
   if (!lead) return { ok: false, error: "診断結果が見つかりません" };
   const parsed = interviewSchema.safeParse(input);

@@ -37,7 +37,7 @@ export function InterviewCta({ token, name, phone, requested }: { token: string;
         <p className="mt-2 text-sm leading-relaxed text-ink-700">
           {name}さん、ありがとうございます。担当のキャリアアドバイザーから<strong>{BRAND.contactLeadTime}</strong>に
           <br className="hidden sm:inline" />
-          <span className="font-semibold">{phone}</span> へご連絡します。
+          <span className="font-semibold">{phone || "ご登録の電話番号"}</span> へご連絡します。
         </p>
         <p className="mt-3 text-xs text-ink-500">知らない番号からの着信になる場合があります。出られなかった場合はSMSでもご連絡します。</p>
       </div>
@@ -84,7 +84,7 @@ export function InterviewCta({ token, name, phone, requested }: { token: string;
         <Button variant="accent" size="lg" className="w-full" onClick={submit} disabled={pending}>
           {pending ? "送信中…" : "無料でカジュアル面談を申し込む"}
         </Button>
-        <p className="text-center text-xs text-ink-500">ご登録の電話番号 ({phone}) に担当者からご連絡します</p>
+        <p className="text-center text-xs text-ink-500">ご登録の電話番号{phone ? ` (${phone})` : ""}に担当者からご連絡します</p>
       </div>
     </div>
   );

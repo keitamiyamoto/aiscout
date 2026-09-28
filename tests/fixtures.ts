@@ -1,0 +1,26 @@
+import type { Answers } from "@/lib/schemas";
+
+export const SAMPLE: Answers = {
+  age: "30",
+  jobCategory: "sales",
+  industry: "it",
+  employmentType: "fulltime",
+  companySize: "m",
+  prefecture: "東京都",
+  currentIncome: 420,
+  jobYears: "3",
+  management: "leader",
+  jobChanges: "1",
+  education: "university",
+  skillLevels: { sales: 4, hospitality: 2, office: 2 },
+  skills: ["license"],
+  achievements: ["target"],
+  motivation: "numbers",
+  strength: "talk",
+  reputation: "reliable",
+  workStyle: "team",
+  interests: ["digital", "money"],
+  priority: "income",
+  desiredIncome: 500,
+  timing: "3m",
+};
