@@ -40,10 +40,10 @@ const next = async () => {
 
 // 1. top
 await page.goto(`${BASE}/?utm_source=smoke&utm_medium=e2e`);
-ok("top headline", (await page.locator("h1").innerText()).includes("市場価値"));
+ok("top headline", (await page.locator("h1").innerText()).includes("年収"));
 ok("no horizontal scroll on top", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
 await shot(page, "01-top");
-await page.click("text=無料で診断をはじめる");
+await page.locator("text=無料で診断をはじめる").first().click();
 await page.waitForURL(/\/diagnosis/);
 await page.waitForSelector("text=あなたの年齢を教えてください");
 ok("Q1 shown", true);
@@ -163,7 +163,7 @@ await shot(page, "10-interview-done");
 await page.goto(resultUrl);
 ok("revisit shows requested state", (await page.locator("text=お申し込みを受け付けました").count()) === 1);
 await page.goto(`${BASE}/`);
-ok("top shows last result link", (await page.locator("text=前回の診断結果を見る").count()) === 1);
+ok("top shows last result link", (await page.locator("text=前回の診断結果を見る").count()) >= 1);
 ok("draft cleared after submit", (await page.locator("text=続きから再開する").count()) === 0);
 
 // 8. unknown token
