@@ -24,6 +24,13 @@
   --color-sun-100: #fff3d6;
   --color-sun-300: #ffd98a;
   --color-sun-500: #f2b33d;
+  --color-orange-50: #fff4ea;
+  --color-orange-100: #ffe3c8;
+  --color-orange-500: #f5821f;
+  --color-orange-600: #e06d0c;
+  --color-orange-800: #b0520a;
+  --color-sky-50: #eef6fb;
+  --color-sky-100: #d9ecf7;
   --color-coral-100: #fde3e1;
   --color-coral-600: #d9534f;
   --color-coral-700: #b93c38;
@@ -224,5 +231,35 @@ input[type="file"] {
   .grow-x,
   .rise-in {
     animation: none;
+  }
+}
+
+/* ---------- LP: CTA のきらめき ---------- */
+@keyframes shine {
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+  }
+  60%,
+  100% {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+}
+.cta-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.45), transparent);
+  animation: shine 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-shine::after {
+    animation: none;
+    display: none;
   }
 }
