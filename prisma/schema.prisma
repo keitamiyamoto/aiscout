@@ -1,0 +1,60 @@
+// Prisma schema for AIスカウト (年収・適職診断)
+// Local dev: PostgreSQL (see .env.example). Production: Supabase / Neon / any PostgreSQL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Supabase: DATABASE_URL = Transaction pooler (port 6543, ?pgbouncer=true), DIRECT_URL = direct connection (port 5432).
+  // Local: both can be the same URL.
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// 診断1回 = 1件。人材紹介の架電リストの元データ。
+model Lead {
+  id              String    @id @default(cuid())
+  /// 結果ページの URL に使う推測されにくいトークン
+  token           String    @unique
+  // 連絡先
+  name            String
+  nameKana        String
+  phone           String
+  email           String
+  contactTimes    String[]
+  // 検索・一覧用に回答の一部を列に持つ (全回答は answers)
+  age             String
+  prefecture      String
+  jobCategory     String
+  employmentType  String
+  currentIncome   Int
+  desiredIncome   Int
+  timing          String
+  marketValue     Int
+  topJob          String
+  answers         Json
+  result          Json
+  engineVersion   Int
+  // カジュアル面談の申込
+  interviewRequestedAt DateTime?
+  interviewMethod String?
+  interviewNote   String?
+  // 架電ステータス (new | called | scheduled | done | ng)
+  status          String    @default("new")
+  memo            String    @default("")
+  // 計測
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  userAgent       String?
+  sheetSyncedAt   DateTime?
+  sheetSyncError  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([createdAt])
+  @@index([phone])
+  @@index([status, createdAt])
+}

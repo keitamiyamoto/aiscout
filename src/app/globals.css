@@ -1,0 +1,227 @@
+@import "tailwindcss";
+@import "@fontsource/noto-sans-jp/400.css";
+@import "@fontsource/noto-sans-jp/500.css";
+@import "@fontsource/noto-sans-jp/700.css";
+@import "@fontsource/zen-maru-gothic/500.css";
+@import "@fontsource/zen-maru-gothic/700.css";
+
+/* ---------- Design tokens ---------- */
+@theme {
+  --color-ink-900: #1b2a41;
+  --color-ink-700: #34465e;
+  --color-ink-500: #667588;
+  --color-ink-300: #a9b3c1;
+  --color-sand-50: #fbf9f4;
+  --color-sand-100: #f4f0e6;
+  --color-sand-200: #e8e2d4;
+  --color-sand-300: #d6cdbb;
+  --color-leaf-50: #eef7f1;
+  --color-leaf-100: #d8eedf;
+  --color-leaf-600: #1e7a5a;
+  --color-leaf-700: #17614a;
+  --color-leaf-800: #124b39;
+  --color-sun-100: #fff3d6;
+  --color-sun-300: #ffd98a;
+  --color-sun-500: #f2b33d;
+  --color-coral-100: #fde3e1;
+  --color-coral-600: #d9534f;
+  --color-coral-700: #b93c38;
+  --font-sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  --font-display: "Zen Maru Gothic", "Noto Sans JP", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+  --shadow-soft: 0 1px 2px rgb(27 42 65 / 0.04), 0 10px 30px -14px rgb(27 42 65 / 0.18);
+  --shadow-pop: 0 2px 4px rgb(27 42 65 / 0.06), 0 18px 40px -16px rgb(27 42 65 / 0.28);
+}
+
+:root {
+  --background: var(--color-sand-50);
+  --foreground: var(--color-ink-900);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "palt";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 背景の柔らかい光 (アプリ全体) */
+.app-bg {
+  background-image:
+    radial-gradient(60rem 30rem at -10% -10%, rgb(255 243 214 / 0.7), transparent 60%),
+    radial-gradient(50rem 26rem at 110% 0%, rgb(216 238 223 / 0.7), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* クリックできるものは指カーソルに (Tailwind v4 の preflight は button を default にするため) */
+button:not(:disabled),
+a[href],
+select:not(:disabled),
+summary,
+label:has(> input[type="radio"]),
+label:has(> input[type="checkbox"]),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="file"] {
+  cursor: pointer;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  border: 3px solid rgb(30 122 90 / 0.2);
+  border-top-color: rgb(30 122 90);
+  animation: spin-slow 0.8s linear infinite;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise-in {
+  animation: rise-in 0.35s ease-out both;
+}
+
+/* ---------- 質問の画面遷移 ---------- */
+@keyframes slide-next {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slide-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.slide-next {
+  animation: slide-next 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.slide-prev {
+  animation: slide-prev 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+  100% {
+    transform: none;
+  }
+}
+.pop-in {
+  animation: pop-in 0.5s ease-out both;
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.grow-x {
+  transform-origin: left center;
+  animation: grow-x 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ---------- スライダー ---------- */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2.25rem;
+  background: transparent;
+  --fill: 0%;
+}
+.range:focus {
+  outline: none;
+}
+.range::-webkit-slider-runnable-track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--color-leaf-600) var(--fill), var(--color-sand-200) var(--fill));
+}
+.range::-moz-range-track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--color-leaf-600) var(--fill), var(--color-sand-200) var(--fill));
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -0.625rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid var(--color-leaf-600);
+  box-shadow: 0 4px 10px -4px rgb(30 122 90 / 0.7);
+  cursor: grab;
+}
+.range::-moz-range-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid var(--color-leaf-600);
+  box-shadow: 0 4px 10px -4px rgb(30 122 90 / 0.7);
+  cursor: grab;
+}
+.range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 6px var(--color-leaf-100);
+}
+.range.range-sm {
+  height: 1.75rem;
+}
+.range.range-sm::-webkit-slider-thumb {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: -0.45rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-next,
+  .slide-prev,
+  .pop-in,
+  .grow-x,
+  .rise-in {
+    animation: none;
+  }
+}
