@@ -31,7 +31,7 @@ export function InterviewCta({ token, name, phone, requested }: { token: string;
 
   if (done) {
     return (
-      <div className="pop-in rounded-3xl border-2 border-leaf-600 bg-leaf-50 p-6 text-center sm:p-8">
+      <div className="pop-in rounded-md border-2 border-leaf-600 bg-leaf-50 p-6 text-center sm:p-8">
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-leaf-600 text-2xl text-white">✓</span>
         <p className="mt-4 font-display text-xl font-bold text-ink-900">カジュアル面談のお申し込みを受け付けました</p>
         <p className="mt-2 text-sm leading-relaxed text-ink-700">
@@ -45,7 +45,7 @@ export function InterviewCta({ token, name, phone, requested }: { token: string;
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-sand-200 bg-white shadow-pop">
+    <div className="overflow-hidden rounded-md border-2 border-leaf-600 bg-white">
       <BusyOverlay show={pending} label="送信しています…" />
       <div className="bg-sun-100 px-6 py-6 sm:px-8">
         <p className="text-sm font-bold text-leaf-700">無料・最短30分</p>
@@ -80,7 +80,7 @@ export function InterviewCta({ token, name, phone, requested }: { token: string;
           </span>
           <Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="例: 未経験からITエンジニアに挑戦できるか相談したい" maxLength={500} />
         </label>
-        {error && <p className="rounded-2xl bg-coral-100/60 px-4 py-3 text-sm font-medium text-coral-700">{error}</p>}
+        {error && <p className="rounded-lg bg-coral-100/60 px-4 py-3 text-sm font-medium text-coral-700">{error}</p>}
         <Button variant="accent" size="lg" className="w-full" onClick={submit} disabled={pending}>
           {pending ? "送信中…" : "無料でカジュアル面談を申し込む"}
         </Button>

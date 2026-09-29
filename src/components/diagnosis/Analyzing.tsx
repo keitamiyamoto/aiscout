@@ -19,7 +19,7 @@ export function Analyzing({ show }: { show: boolean }) {
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-sand-50/90 px-4 backdrop-blur-sm" role="status" aria-live="polite" aria-busy="true">
-      <div className="rise-in w-full max-w-sm rounded-3xl border border-sand-200 bg-white p-7 text-center shadow-pop">
+      <div className="rise-in w-full max-w-sm rounded-lg border border-sand-200 bg-white p-7 text-center shadow-pop">
         <LogoMark size={72} className="mx-auto animate-bounce" />
         <p className="mt-4 font-display text-xl font-bold text-ink-900">診断しています…</p>
         <ul className="mt-5 space-y-2.5 text-left text-sm">

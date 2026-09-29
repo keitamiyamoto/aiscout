@@ -1,9 +1,8 @@
 <svg width="64" height="64" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="48" height="48" rx="12" fill="#1B2A41"/>
-  <path d="M29 30l8 8" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
-  <circle cx="21" cy="22" r="12" fill="#FFFFFF"/>
-  <circle cx="17.2" cy="20.5" r="1.7" fill="#1B2A41"/>
-  <circle cx="24.8" cy="20.5" r="1.7" fill="#1B2A41"/>
-  <path d="M16.5 25c2.1 2.6 7.9 2.6 10 0" stroke="#1B2A41" stroke-width="2.1" stroke-linecap="round"/>
-  <path d="M39 14V6M35.5 9.5L39 6l3.5 3.5" stroke="#F2B33D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="48" height="48" rx="12" fill="#0A88D4"/>
+  <path d="M24 8c10 0 16 7 16 17s-6 16-16 16S8 35 8 25 14 8 24 8z" fill="#CFE8FA" stroke="#1D4F7C" stroke-width="2.4"/>
+  <ellipse cx="18" cy="23.5" rx="2" ry="2.6" fill="#1D4F7C"/>
+  <rect x="24" y="17.5" width="11" height="10" rx="3" fill="#FFE500" stroke="#1D4F7C" stroke-width="2"/>
+  <ellipse cx="29.5" cy="22.5" rx="1.8" ry="2.4" fill="#1D4F7C"/>
+  <path d="M19.5 31.5c2.3 2.6 6.7 2.6 9 0" stroke="#1D4F7C" stroke-width="2.2" stroke-linecap="round"/>
 </svg>

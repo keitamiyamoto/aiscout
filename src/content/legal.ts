@@ -13,7 +13,7 @@ export const COMPANY = {
   representative: "代表取締役　宮本 慶太",
   address: "〒540-0026 大阪府大阪市中央区内本町2丁目3番1号 ストークNEビル6階",
   site: "https://enter-the-pocket.com/",
-  service: "AIスカウト 年収・適職診断",
+  service: "AIスカウター 自分の市場価値調べるくん",
   contactEmail: "info@enter-the-pocket.com",
   licenseNumber: "27-ユ-305015",
   enacted: "2026年9月28日",

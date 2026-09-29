@@ -23,8 +23,8 @@ export function ChoiceButton({ on, onClick, children, sub, role = "radio" }: { o
       role={role}
       aria-checked={on}
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-2xl border-2 px-4 py-3.5 text-left transition-all duration-150 active:scale-[0.99] ${
-        on ? "border-leaf-600 bg-leaf-50 shadow-[0_8px_20px_-12px_rgb(30_122_90/0.7)]" : "border-sand-200 bg-white hover:border-leaf-600/40 hover:bg-sand-50"
+      className={`flex w-full items-center gap-3 rounded-lg border-2 px-4 py-3.5 text-left transition-all duration-150 active:scale-[0.99] ${
+        on ? "border-leaf-600 bg-leaf-50 " : "border-sand-200 bg-white hover:border-leaf-600/40 hover:bg-sand-50"
       }`}
     >
       <Check on={on} />
@@ -92,7 +92,7 @@ export function Pill({ on, onClick, children }: { on: boolean; onClick: () => vo
       type="button"
       onClick={onClick}
       aria-pressed={on}
-      className={`rounded-full border px-3.5 py-2 text-sm font-medium transition ${on ? "border-leaf-600 bg-leaf-600 text-white shadow-[0_4px_12px_-6px_rgb(30_122_90/0.8)]" : "border-sand-300 bg-white text-ink-700 hover:border-ink-300"}`}
+      className={`rounded-full border px-3.5 py-2 text-sm font-medium transition ${on ? "border-leaf-600 bg-leaf-600 text-white " : "border-sand-300 bg-white text-ink-700 hover:border-ink-300"}`}
     >
       {children}
     </button>

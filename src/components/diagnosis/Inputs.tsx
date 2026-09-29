@@ -8,7 +8,7 @@ const fill = (v: number, min: number, max: number) => `${((v - min) / (max - min
 export function IncomeSlider({ value, onChange, min, max, step }: { value: number; onChange: (v: number) => void; min: number; max: number; step: number }) {
   const set = (v: number) => onChange(Math.min(max, Math.max(min, Math.round(v / step) * step)));
   return (
-    <div className="rounded-3xl border border-sand-200 bg-white p-5 shadow-soft sm:p-7">
+    <div className="rounded-lg border border-sand-200 bg-white p-5 sm:p-7">
       <p className="text-center text-sm font-semibold text-ink-500">年収 (税込)</p>
       <p className="mt-1 text-center font-display font-bold text-ink-900" aria-live="polite">
         <span className="text-5xl tabular-nums sm:text-6xl">{value.toLocaleString("ja-JP")}</span>
@@ -70,7 +70,7 @@ export function PrefecturePicker({ value, onPick }: { value: string | undefined;
 export function SkillLevels({ items, scale, values, onChange }: { items: readonly Opt[]; scale: readonly string[]; values: Record<string, number>; onChange: (v: Record<string, number>) => void }) {
   const max = scale.length - 1;
   return (
-    <div className="divide-y divide-sand-200 rounded-3xl border border-sand-200 bg-white px-5 shadow-soft">
+    <div className="divide-y divide-sand-200 rounded-lg border border-sand-200 bg-white px-5">
       {items.map((it) => {
         const v = values[it.value] ?? 0;
         return (

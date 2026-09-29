@@ -142,7 +142,7 @@ export default function DiagnosisFlow() {
             <div className="mt-6">
               <ContactForm value={contact} onChange={setContact} errors={errors} honeypot={honeypot} onHoneypot={setHoneypot} />
             </div>
-            {message && <p className="mt-4 rounded-2xl bg-coral-100/60 px-4 py-3 text-sm font-medium text-coral-700">{message}</p>}
+            {message && <p className="mt-4 rounded-lg bg-coral-100/60 px-4 py-3 text-sm font-medium text-coral-700">{message}</p>}
           </>
         )}
       </div>

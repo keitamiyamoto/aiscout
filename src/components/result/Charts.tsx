@@ -9,10 +9,10 @@ export function ScoreGauge({ score, rank, label }: { score: number; rank: string
     <div className="mx-auto">
       <div className="relative mx-auto w-44">
         <svg viewBox="0 0 128 72" className="w-full" aria-hidden="true">
-          <path d={`M12 64a${r} ${r} 0 0 1 104 0`} stroke="rgb(255 255 255 / 0.15)" strokeWidth="11" strokeLinecap="round" fill="none" />
+          <path d={`M12 64a${r} ${r} 0 0 1 104 0`} stroke="#E3E8EE" strokeWidth="11" strokeLinecap="round" fill="none" />
           <path
             d={`M12 64a${r} ${r} 0 0 1 104 0`}
-            stroke="#F2B33D"
+            stroke="#FFE500"
             strokeWidth="11"
             strokeLinecap="round"
             fill="none"
@@ -20,13 +20,13 @@ export function ScoreGauge({ score, rank, label }: { score: number; rank: string
             strokeDashoffset={len * (1 - score / 100)}
           />
         </svg>
-        <p className="absolute inset-x-0 bottom-0 text-center font-display text-3xl font-bold leading-none text-white">
+        <p className="absolute inset-x-0 bottom-0 text-center text-3xl font-black leading-none text-ink-900">
           {score}
-          <span className="text-sm text-white/60">/100</span>
+          <span className="text-sm text-ink-500">/100</span>
         </p>
       </div>
-      <p className="mt-3 whitespace-nowrap text-center text-xs text-white/75">
-        市場価値スコア・ランク <span className="font-display text-base font-bold text-sun-300">{rank}</span>
+      <p className="mt-3 whitespace-nowrap text-center text-xs font-bold text-ink-700">
+        市場価値スコア・ランク <span className="text-base font-black text-leaf-600">{rank}</span>
         <span className="ml-1">({label})</span>
       </p>
     </div>
@@ -72,21 +72,21 @@ export function TraitRadar({ traits }: { traits: DiagnosisResult["traits"] }) {
   return (
     <svg viewBox="0 0 220 208" className="mx-auto w-full max-w-xs" role="img" aria-label={traits.map((t) => `${t.label} ${t.value}`).join("、")}>
       {[0.25, 0.5, 0.75, 1].map((v) => (
-        <polygon key={v} points={ring(v)} fill="none" stroke="#E8E2D4" strokeWidth="1" />
+        <polygon key={v} points={ring(v)} fill="none" stroke="#E3E8EE" strokeWidth="1" />
       ))}
       {traits.map((_, i) => {
         const [x, y] = pt(i, 1);
-        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#E8E2D4" strokeWidth="1" />;
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#E3E8EE" strokeWidth="1" />;
       })}
-      <polygon points={shape} fill="rgb(30 122 90 / 0.22)" stroke="#1E7A5A" strokeWidth="2" strokeLinejoin="round" />
+      <polygon points={shape} fill="rgb(10 136 212 / 0.2)" stroke="#0A88D4" strokeWidth="2" strokeLinejoin="round" />
       {traits.map((t, i) => {
         const [x, y] = pt(i, Math.max(0.08, t.value / 100));
-        return <circle key={t.key} cx={x} cy={y} r="3" fill="#1E7A5A" />;
+        return <circle key={t.key} cx={x} cy={y} r="3" fill="#0A88D4" />;
       })}
       {traits.map((t, i) => {
         const [x, y] = pt(i, 1.24);
         return (
-          <text key={t.key} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontSize="10.5" fontWeight="700" fill="#34465E">
+          <text key={t.key} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontSize="10.5" fontWeight="700" fill="#3C4652">
             {TRAITS[t.key].short}
           </text>
         );

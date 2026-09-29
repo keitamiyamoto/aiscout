@@ -8,17 +8,15 @@ import { answeredCount, captureUtm, clearDraft, loadDraft, loadLastToken } from 
 
 const KEYS = QUESTIONS.map((q) => q.key);
 
-/** 求人メディア風の CTA (オレンジ・下に濃い影・きらめき) */
+/** 黄色 + 青枠のピル型ボタン */
 export const CTA_CLASS =
-  "cta-shine group inline-flex w-full items-center justify-center gap-3 rounded-full bg-orange-500 px-10 py-4 text-lg font-black tracking-wide text-white shadow-[0_5px_0_var(--color-orange-800)] transition-all hover:bg-orange-600 active:translate-y-[3px] active:shadow-[0_2px_0_var(--color-orange-800)] sm:w-auto";
+  "group relative inline-flex w-full items-center justify-center rounded-full border-2 border-leaf-600 bg-sun-500 px-12 py-4 text-lg font-black tracking-wider text-leaf-700 transition hover:brightness-95 active:translate-y-px sm:w-[22rem]";
 
 function Arrow() {
   return (
-    <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-orange-600 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
-      <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
-        <path d="M7.5 4.5L13 10l-5.5 5.5" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
+    <svg viewBox="0 0 20 20" className="absolute right-5 h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" aria-hidden="true">
+      <path d="M7.5 4.5L13 10l-5.5 5.5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
@@ -43,7 +41,7 @@ export function TopActions({ align = "start", note = true, onDark = false }: { a
       {resumeAt !== null ? (
         <>
           <Link href={`/diagnosis?q=${resumeAt + 1}`} className={CTA_CLASS}>
-            続きから再開する (Q{Math.min(resumeAt + 1, QUESTIONS.length)}〜)
+            前回の続きからスタート
             <Arrow />
           </Link>
           <button
@@ -59,11 +57,11 @@ export function TopActions({ align = "start", note = true, onDark = false }: { a
         </>
       ) : (
         <Link href="/diagnosis" className={CTA_CLASS}>
-          無料で診断をはじめる
+          診断スタート
           <Arrow />
         </Link>
       )}
-      {note && resumeAt === null && <p className={`text-xs font-bold ${onDark ? "text-white/85" : "text-ink-500"}`}>＼ 会員登録なし・全{QUESTIONS.length}問 ／</p>}
+      {note && <p className={`text-[11px] leading-5 ${onDark ? "text-white/80" : "text-ink-500"}`}>診断結果をご覧いただくには、お名前と連絡先の入力が必要です。</p>}
       {lastToken && (
         <Link href={`/result/${lastToken}`} className={`text-sm font-bold underline underline-offset-4 ${onDark ? "text-white/90 hover:text-white" : "text-ink-700 hover:text-ink-900"}`}>
           前回の診断結果を見る

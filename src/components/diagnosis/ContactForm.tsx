@@ -27,7 +27,7 @@ export function ContactForm({
   };
 
   return (
-    <div className="space-y-5 rounded-3xl border border-sand-200 bg-white p-5 shadow-soft sm:p-7">
+    <div className="space-y-5 rounded-lg border border-sand-200 bg-white p-5 sm:p-7">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="お名前" required error={errors.name}>
           <Input name="name" autoComplete="name" value={v.name} onChange={(e) => set({ name: e.target.value })} placeholder="山田 太郎" />
@@ -65,7 +65,7 @@ export function ContactForm({
         </label>
       </div>
 
-      <label className="flex items-start gap-2.5 rounded-2xl bg-sand-50 p-4 text-sm leading-relaxed text-ink-900">
+      <label className="flex items-start gap-2.5 rounded-lg bg-sand-50 p-4 text-sm leading-relaxed text-ink-900">
         <input type="checkbox" name="consent" checked={v.consent} onChange={(e) => set({ consent: e.target.checked })} className="mt-1 h-4 w-4 accent-leaf-600" />
         <span>
           <Link href="/terms" target="_blank" className="font-semibold text-leaf-700 underline">

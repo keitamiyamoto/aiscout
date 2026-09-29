@@ -15,8 +15,8 @@ export function Button({ variant = "primary", size = "md", className, ...rest }:
         size === "sm" && "px-3.5 py-1.5 text-sm",
         size === "md" && "px-5 py-2.5 text-sm",
         size === "lg" && "px-7 py-3.5 text-base",
-        variant === "primary" && "bg-leaf-600 text-white shadow-[0_6px_16px_-8px_rgb(30_122_90/0.7)] hover:bg-leaf-700",
-        variant === "accent" && "bg-sun-500 text-ink-900 shadow-[0_6px_16px_-8px_rgb(242_179_61/0.8)] hover:brightness-95",
+        variant === "primary" && "bg-leaf-600 text-white hover:bg-leaf-700",
+        variant === "accent" && "border-2 border-leaf-600 bg-sun-500 text-leaf-700 hover:brightness-95",
         variant === "secondary" && "border border-sand-300 bg-white text-ink-900 hover:border-ink-300 hover:bg-sand-50",
         variant === "ghost" && "text-ink-700 hover:bg-sand-100",
         variant === "danger" && "border border-coral-100 bg-white text-coral-600 hover:bg-coral-100/60",
@@ -72,7 +72,7 @@ export function Field({
 }
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cx("rounded-3xl border border-sand-200 bg-white p-6 shadow-soft", className)}>{children}</div>;
+  return <div className={cx("rounded-lg border border-sand-200 bg-white p-6 shadow-soft", className)}>{children}</div>;
 }
 
 export function Badge({ children, tone = "gray" }: { children: ReactNode; tone?: "gray" | "indigo" | "green" | "sun" }) {
@@ -96,7 +96,7 @@ export function BusyOverlay({ show, label = "処理中です…" }: { show: bool
   if (!show) return null;
   return (
     <div className="no-print fixed inset-0 z-[100] flex items-center justify-center bg-sand-50/75 backdrop-blur-[2px]" role="status" aria-live="polite" aria-busy="true">
-      <div className="rise-in flex flex-col items-center gap-3 rounded-3xl border border-sand-200 bg-white px-10 py-7 shadow-pop">
+      <div className="rise-in flex flex-col items-center gap-3 rounded-lg border border-sand-200 bg-white px-10 py-7 shadow-pop">
         <div className="spinner" />
         <p className="text-sm font-semibold text-ink-900">{label}</p>
       </div>

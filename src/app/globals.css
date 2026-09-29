@@ -3,39 +3,30 @@
 @import "@fontsource/noto-sans-jp/500.css";
 @import "@fontsource/noto-sans-jp/700.css";
 @import "@fontsource/noto-sans-jp/900.css";
-@import "@fontsource/zen-maru-gothic/500.css";
-@import "@fontsource/zen-maru-gothic/700.css";
 
 /* ---------- Design tokens ---------- */
 @theme {
-  --color-ink-900: #1b2a41;
-  --color-ink-700: #34465e;
-  --color-ink-500: #667588;
+  --color-ink-900: #222a33;
+  --color-ink-700: #3c4652;
+  --color-ink-500: #6b7682;
   --color-ink-300: #a9b3c1;
-  --color-sand-50: #fbf9f4;
-  --color-sand-100: #f4f0e6;
-  --color-sand-200: #e8e2d4;
-  --color-sand-300: #d6cdbb;
-  --color-leaf-50: #eef7f1;
-  --color-leaf-100: #d8eedf;
-  --color-leaf-600: #1e7a5a;
-  --color-leaf-700: #17614a;
-  --color-leaf-800: #124b39;
-  --color-sun-100: #fff3d6;
-  --color-sun-300: #ffd98a;
-  --color-sun-500: #f2b33d;
-  --color-orange-50: #fff4ea;
-  --color-orange-100: #ffe3c8;
-  --color-orange-500: #f5821f;
-  --color-orange-600: #e06d0c;
-  --color-orange-800: #b0520a;
-  --color-sky-50: #eef6fb;
-  --color-sky-100: #d9ecf7;
+  --color-sand-50: #f7f9fb;
+  --color-sand-100: #f1f4f7;
+  --color-sand-200: #e3e8ee;
+  --color-sand-300: #cdd5de;
+  --color-leaf-50: #edf6fd;
+  --color-leaf-100: #d3eaf9;
+  --color-leaf-600: #0a88d4;
+  --color-leaf-700: #0473b8;
+  --color-leaf-800: #075a8f;
+  --color-sun-100: #fffbd6;
+  --color-sun-300: #fff27a;
+  --color-sun-500: #ffe500;
   --color-coral-100: #fde3e1;
   --color-coral-600: #d9534f;
   --color-coral-700: #b93c38;
   --font-sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
-  --font-display: "Zen Maru Gothic", "Noto Sans JP", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+  --font-display: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", system-ui, sans-serif;
   --shadow-soft: 0 1px 2px rgb(27 42 65 / 0.04), 0 10px 30px -14px rgb(27 42 65 / 0.18);
   --shadow-pop: 0 2px 4px rgb(27 42 65 / 0.06), 0 18px 40px -16px rgb(27 42 65 / 0.28);
 }
@@ -62,13 +53,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 背景の柔らかい光 (アプリ全体) */
-.app-bg {
-  background-image:
-    radial-gradient(60rem 30rem at -10% -10%, rgb(255 243 214 / 0.7), transparent 60%),
-    radial-gradient(50rem 26rem at 110% 0%, rgb(216 238 223 / 0.7), transparent 60%);
-  background-attachment: fixed;
-}
 
 /* クリックできるものは指カーソルに (Tailwind v4 の preflight は button を default にするため) */
 button:not(:disabled),
@@ -92,8 +76,8 @@ input[type="file"] {
   width: 2rem;
   height: 2rem;
   border-radius: 9999px;
-  border: 3px solid rgb(30 122 90 / 0.2);
-  border-top-color: rgb(30 122 90);
+  border: 3px solid rgb(10 136 212 / 0.2);
+  border-top-color: rgb(10 136 212);
   animation: spin-slow 0.8s linear infinite;
 }
 
@@ -200,7 +184,7 @@ input[type="file"] {
   border-radius: 9999px;
   background: #fff;
   border: 3px solid var(--color-leaf-600);
-  box-shadow: 0 4px 10px -4px rgb(30 122 90 / 0.7);
+  box-shadow: 0 4px 10px -4px rgb(10 136 212 / 0.7);
   cursor: grab;
 }
 .range::-moz-range-thumb {
@@ -209,7 +193,7 @@ input[type="file"] {
   border-radius: 9999px;
   background: #fff;
   border: 3px solid var(--color-leaf-600);
-  box-shadow: 0 4px 10px -4px rgb(30 122 90 / 0.7);
+  box-shadow: 0 4px 10px -4px rgb(10 136 212 / 0.7);
   cursor: grab;
 }
 .range:focus-visible::-webkit-slider-thumb {
@@ -234,32 +218,3 @@ input[type="file"] {
   }
 }
 
-/* ---------- LP: CTA のきらめき ---------- */
-@keyframes shine {
-  0% {
-    transform: translateX(-120%) skewX(-20deg);
-  }
-  60%,
-  100% {
-    transform: translateX(260%) skewX(-20deg);
-  }
-}
-.cta-shine {
-  position: relative;
-  overflow: hidden;
-}
-.cta-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 35%;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.45), transparent);
-  animation: shine 3.2s ease-in-out infinite;
-  pointer-events: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .cta-shine::after {
-    animation: none;
-    display: none;
-  }
-}
