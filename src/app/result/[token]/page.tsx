@@ -11,7 +11,8 @@ import { InterviewCta } from "@/components/result/InterviewCta";
 import { candidateDates } from "@/lib/interview-dates";
 import { BRAND } from "@/lib/brand";
 import { getLeadByToken } from "@/lib/leads";
-import { RANK_LABEL, diagnose, type DiagnosisResult } from "@/lib/engine";
+import { ENGINE_VERSION, RANK_LABEL, diagnose, type DiagnosisResult } from "@/lib/engine";
+import { answersSchema } from "@/lib/schemas";
 import { decodePreviewToken, isPreviewMode, isPreviewToken } from "@/lib/preview";
 
 type View = { token: string; name: string; phone: string; requested: boolean; result: DiagnosisResult };
@@ -24,7 +25,13 @@ async function loadView(token: string): Promise<View | null> {
   if (isPreviewMode()) return null;
   const lead = await getLeadByToken(token);
   if (!lead) return null;
-  return { token: lead.token, name: lead.name, phone: lead.phone, requested: Boolean(lead.interviewRequestedAt), result: lead.result as DiagnosisResult };
+  // 計算ロジックが変わる前の結果は、保存してある回答から計算し直して表示する
+  let result = lead.result as DiagnosisResult;
+  if (result.version !== ENGINE_VERSION) {
+    const answers = answersSchema.safeParse(lead.answers);
+    if (answers.success) result = diagnose(answers.data);
+  }
+  return { token: lead.token, name: lead.name, phone: lead.phone, requested: Boolean(lead.interviewRequestedAt), result };
 }
 
 /** 青い帯の見出しがついた白い箱 (トップの「分かること」と同じ形) */
@@ -90,7 +97,7 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
                   )}
                 </div>
                 <div className="flex items-end justify-center gap-2">
-                  <ScoreGauge score={r.score} rank={r.rank} label={RANK_LABEL[r.rank]} />
+                  <ScoreGauge score={r.score} rank={r.rank} label={RANK_LABEL[r.rank]} topPercent={r.topPercent} />
                   <Mascot pose="wave" className="hidden w-24 sm:block" />
                 </div>
               </div>

@@ -5,7 +5,8 @@
  */
 import type { Answers } from "@/lib/schemas";
 
-export const ENGINE_VERSION = 1;
+/** 2: スコアを同条件の人の中でのパーセンタイルに変更 */
+export const ENGINE_VERSION = 2;
 
 /* ------------------------------------------------------------------ */
 /* 係数表                                                              */
@@ -225,7 +226,28 @@ export type CareerKey = keyof typeof CAREERS;
 /* ------------------------------------------------------------------ */
 
 export type Rank = "S" | "A" | "B" | "C" | "D";
-export const RANK_LABEL: Record<Rank, string> = { S: "トップクラス", A: "かなり高い", B: "平均以上", C: "平均的", D: "伸びしろ大" };
+export const RANK_LABEL: Record<Rank, string> = { S: "トップクラス", A: "かなり高い", B: "平均的", C: "平均よりやや下", D: "伸びしろ大" };
+
+/**
+ * 「市場価値 ÷ 同年代のよくある人の市場価値」の対数の平均と標準偏差。
+ * 年代と経歴の組み合わせが現実的なランダム回答 (tests/fixtures.ts) 2万件で測った値。
+ * 係数表を変えて tests/engine.test.ts の分布テストが落ちたら測り直してください。
+ */
+export const PEER_LOG_MEAN = -0.03;
+export const PEER_LOG_SD = 0.12;
+
+/** スコア (パーセンタイル) からランク。S=上位10% / A=上位30% / B=上位60% / C=上位85% / D=それ以外 */
+export function rankOf(score: number): Rank {
+  return score >= 90 ? "S" : score >= 70 ? "A" : score >= 40 ? "B" : score >= 15 ? "C" : "D";
+}
+
+/** 標準正規分布の累積分布関数 (Abramowitz-Stegun 近似) */
+function normalCdf(z: number): number {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp((-z * z) / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - p : p;
+}
 
 export type Factor = { label: string; text: string; delta: number };
 export type JobMatch = { key: CareerKey; name: string; match: number; incomeLow: number; incomeHigh: number; reason: string; experienced: boolean };
@@ -238,8 +260,11 @@ export type DiagnosisResult = {
   currentIncome: number;
   diff: number;
   peerAverage: number;
+  /** 同年代・同職種・同エリアの中でのパーセンタイル (1〜99) */
   score: number;
   rank: Rank;
+  /** 上位何% か (旧バージョンの結果には無い) */
+  topPercent?: number;
   desiredIncome: number;
   desiredVerdict: string;
   plus: Factor[];
@@ -336,8 +361,54 @@ export function matchJobs(a: Answers, traits: TraitScore, bonus: number, limit =
   return scored.slice(0, limit).map(({ total, ...rest }) => ({ ...rest, match: clamp(Math.round(68 + total * 20), 60, 98) }));
 }
 
+/** 係数を掛け合わせた想定年収 (現在の年収を加味する前) */
+function modelIncome(a: Answers, bonus: number): number {
+  return (
+    BASE_INCOME[a.jobCategory] *
+    AGE_FACTOR[a.age] *
+    JOB_YEARS_FACTOR[a.jobYears] *
+    MANAGEMENT_FACTOR[a.management] *
+    COMPANY_SIZE_FACTOR[a.companySize] *
+    INDUSTRY_FACTOR[a.industry] *
+    EDUCATION_FACTOR[a.education] *
+    EMPLOYMENT_FACTOR[a.employmentType] *
+    JOB_CHANGES_FACTOR[a.jobChanges] *
+    regionFactor(a.prefecture) *
+    (1 + bonus)
+  );
+}
+
+/** 年代ごとの「よくある経歴」(経験年数・役職) */
+const TYPICAL_BY_AGE: Record<Answers["age"], Pick<Answers, "jobYears" | "management">> = {
+  u25: { jobYears: "1", management: "none" },
+  "25": { jobYears: "3", management: "none" },
+  "30": { jobYears: "3", management: "leader" },
+  "35": { jobYears: "5", management: "leader" },
+  "40": { jobYears: "5", management: "leader" },
+  "45": { jobYears: "10", management: "manager" },
+  "50": { jobYears: "10", management: "manager" },
+};
+/** よくある人のスキル・資格・実績の上乗せ (スキル少し + 免許 + 実績ひとつ程度) */
+const TYPICAL_BONUS = 0.05;
+
+/**
+ * 同年代・同職種・同エリアの「よくある経歴の人」の市場価値。
+ * 経験年数と役職は年代相応、会社・業界・学歴・雇用形態は平均的 (正社員) とみなす。
+ */
+export function peerIncome(a: Answers): number {
+  const typical: Answers = {
+    ...a,
+    ...TYPICAL_BY_AGE[a.age],
+    companySize: "unknown",
+    industry: "other",
+    education: "university",
+    employmentType: "fulltime",
+    jobChanges: "1",
+  };
+  return modelIncome(typical, TYPICAL_BONUS);
+}
+
 export function diagnose(a: Answers): DiagnosisResult {
-  const base = BASE_INCOME[a.jobCategory];
   const region = regionFactor(a.prefecture);
   const qualification = listBonus(a.skills, QUALIFICATION_BONUS, QUALIFICATION_CAP);
   const achievement = listBonus(a.achievements, ACHIEVEMENT_BONUS, ACHIEVEMENT_CAP);
@@ -358,18 +429,7 @@ export function diagnose(a: Answers): DiagnosisResult {
     { label: "実績", delta: achievement, text: "具体的な実績はアピール材料になります" },
   ];
 
-  const model =
-    base *
-    AGE_FACTOR[a.age] *
-    JOB_YEARS_FACTOR[a.jobYears] *
-    MANAGEMENT_FACTOR[a.management] *
-    COMPANY_SIZE_FACTOR[a.companySize] *
-    INDUSTRY_FACTOR[a.industry] *
-    EDUCATION_FACTOR[a.education] *
-    EMPLOYMENT_FACTOR[a.employmentType] *
-    JOB_CHANGES_FACTOR[a.jobChanges] *
-    region *
-    (1 + skill + qualification + achievement);
+  const model = modelIncome(a, skill + qualification + achievement);
 
   // 現在の年収も加味する (働いていない・極端に低い場合は重みを下げる)
   const current = a.currentIncome;
@@ -378,10 +438,13 @@ export function diagnose(a: Answers): DiagnosisResult {
   const marketValue = round10(model * (1 - currentWeight) + current * currentWeight);
   const low = round10(marketValue * 0.9);
   const high = round10(marketValue * 1.12);
-  const peerAverage = round10(base * AGE_FACTOR[a.age] * region);
-  const ratio = marketValue / peerAverage;
-  const score = clamp(Math.round(55 + (ratio - 1) * 100), 25, 99);
-  const rank: Rank = score >= 80 ? "S" : score >= 65 ? "A" : score >= 50 ? "B" : score >= 35 ? "C" : "D";
+  // 同年代・同職種・同エリアの「真ん中の人」と比べる。
+  // スコア = その中での順位 (パーセンタイル)。例: 70 なら上位30%
+  const peer = peerIncome(a) * Math.exp(PEER_LOG_MEAN);
+  const peerAverage = round10(peer);
+  const score = clamp(Math.round(100 * normalCdf(Math.log(marketValue / peer) / PEER_LOG_SD)), 1, 99);
+  const rank = rankOf(score);
+  const topPercent = Math.max(1, 100 - score);
 
 
   const plus = factors.filter((f) => f.delta >= 0.02).sort((x, y) => y.delta - x.delta).slice(0, 3);
@@ -419,6 +482,7 @@ export function diagnose(a: Answers): DiagnosisResult {
     peerAverage,
     score,
     rank,
+    topPercent,
     desiredIncome: desired,
     desiredVerdict,
     plus,

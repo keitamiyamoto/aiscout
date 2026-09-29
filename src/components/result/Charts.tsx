@@ -2,7 +2,7 @@ import type { DiagnosisResult } from "@/lib/engine";
 import { TRAITS } from "@/lib/engine";
 
 /** 半円ゲージ (0〜100) */
-export function ScoreGauge({ score, rank, label }: { score: number; rank: string; label: string }) {
+export function ScoreGauge({ score, rank, label, topPercent }: { score: number; rank: string; label: string; topPercent?: number }) {
   const r = 52;
   const len = Math.PI * r;
   return (
@@ -29,6 +29,11 @@ export function ScoreGauge({ score, rank, label }: { score: number; rank: string
         市場価値スコア・ランク <span className="text-base font-black text-leaf-600">{rank}</span>
         <span className="ml-1">({label})</span>
       </p>
+      {topPercent !== undefined && (
+        <p className="mt-1 text-center text-xs text-ink-500">
+          同年代・同職種・同エリアの中で <span className="font-black text-ink-900">上位{topPercent}%</span>
+        </p>
+      )}
     </div>
   );
 }

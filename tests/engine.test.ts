@@ -16,8 +16,8 @@ import {
   diagnose,
 } from "@/lib/engine";
 import { OPTIONS, QUESTIONS } from "@/lib/questions";
-import { answersSchema } from "@/lib/schemas";
-import { SAMPLE } from "./fixtures";
+import { answersSchema, type Answers } from "@/lib/schemas";
+import { SAMPLE, randomAnswers, resetSeed } from "./fixtures";
 
 
 const tables: Array<[string, Record<string, number>, keyof typeof OPTIONS]> = [
@@ -109,5 +109,52 @@ describe("diagnose", () => {
 
   it("適職の候補はそれぞれ名前を持つ", () => {
     for (const c of Object.values(CAREERS)) expect(c.name).toBeTruthy();
+  });
+});
+
+describe("スコアの分布", () => {
+  const sample = (n: number, tweak?: (a: Answers) => void) => {
+    resetSeed();
+    const count: Record<string, number> = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+    for (let i = 0; i < n; i++) {
+      const a = randomAnswers();
+      tweak?.(a);
+      count[diagnose(a).rank] += 1;
+    }
+    return Object.fromEntries(Object.entries(count).map(([k, v]) => [k, v / n]));
+  };
+
+  it("ランダムな回答で S は約1割、どのランクも出る", () => {
+    const p = sample(5000);
+    expect(p.S).toBeGreaterThan(0.05);
+    expect(p.S).toBeLessThan(0.16);
+    expect(p.A).toBeGreaterThan(0.12);
+    expect(p.B).toBeGreaterThan(0.2);
+    expect(p.C).toBeGreaterThan(0.1);
+    expect(p.D).toBeGreaterThan(0.05);
+  });
+
+  it("スキルを全部0にした人は S にほぼならない", () => {
+    const p = sample(3000, (a) => {
+      a.skillLevels = {};
+    });
+    expect(p.S).toBeLessThan(0.05);
+  });
+
+  it("同年代・同職種の平均は、真ん中の人の市場価値に近い", () => {
+    resetSeed();
+    const ratios: number[] = [];
+    for (let i = 0; i < 3000; i++) {
+      const r = diagnose(randomAnswers());
+      ratios.push(r.marketValue / r.peerAverage);
+    }
+    ratios.sort((x, y) => x - y);
+    expect(ratios[1500]).toBeGreaterThan(0.93);
+    expect(ratios[1500]).toBeLessThan(1.07);
+  });
+
+  it("上位% はスコアと対応する", () => {
+    const r = diagnose(SAMPLE);
+    expect(r.topPercent).toBe(Math.max(1, 100 - r.score));
   });
 });
