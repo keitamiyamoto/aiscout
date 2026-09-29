@@ -39,7 +39,10 @@ model Lead {
   engineVersion   Int
   // カジュアル面談の申込
   interviewRequestedAt DateTime?
-  interviewMethod String?
+  interviewMethod String? // 現在は "online" 固定
+  /// 希望日 (YYYY-MM-DD、第3希望まで)
+  interviewDates  String[]  @default([])
+  interviewTime   String? // am | pm | night | any
   interviewNote   String?
   // 架電ステータス (new | called | scheduled | done | ng)
   status          String    @default("new")

@@ -6,6 +6,7 @@ import { listLeads } from "@/lib/leads";
 import { LEAD_STATUS, statusLabel } from "@/lib/lead-columns";
 import { optionLabel } from "@/lib/questions";
 import { formatJst } from "@/lib/format";
+import { formatInterviewDate } from "@/lib/interview-dates";
 import { updateLeadStatusAction } from "@/app/actions/admin";
 
 export const dynamic = "force-dynamic";
@@ -114,7 +115,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                     {l.interviewRequestedAt ? (
                       <>
                         <Badge tone="sun">申込あり</Badge>
-                        <p className="mt-1">{l.interviewMethod ? optionLabel("interviewMethod", l.interviewMethod) : ""}</p>
+                        <p className="mt-1 font-bold">オンライン</p>
+                        {l.interviewDates.map((d, i) => (
+                          <p key={d}>
+                            第{i + 1}希望 {formatInterviewDate(d)}
+                          </p>
+                        ))}
+                        {l.interviewTime && <p className="text-ink-500">{optionLabel("interviewTime", l.interviewTime)}</p>}
                         {l.interviewNote && <p className="mt-1 max-w-[14rem] whitespace-pre-wrap text-ink-500">{l.interviewNote}</p>}
                       </>
                     ) : (

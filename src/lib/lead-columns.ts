@@ -6,6 +6,7 @@ import type { DiagnosisResult } from "@/lib/engine";
 import { optionLabel } from "@/lib/questions";
 import type { Answers } from "@/lib/schemas";
 import { formatJst } from "@/lib/format";
+import { formatInterviewDate } from "@/lib/interview-dates";
 
 export type LeadLike = {
   id: string;
@@ -20,7 +21,8 @@ export type LeadLike = {
   status: string;
   memo: string;
   interviewRequestedAt: Date | null;
-  interviewMethod: string | null;
+  interviewDates: string[];
+  interviewTime: string | null;
   interviewNote: string | null;
   utmSource: string | null;
   utmMedium: string | null;
@@ -74,7 +76,8 @@ export const LEAD_COLUMNS: Col[] = [
   { header: "適職2", value: (_l, _a, r) => r.jobs[1]?.name ?? "" },
   { header: "適職3", value: (_l, _a, r) => r.jobs[2]?.name ?? "" },
   { header: "面談申込日時", value: (l) => (l.interviewRequestedAt ? formatJst(l.interviewRequestedAt) : "") },
-  { header: "面談方法", value: (l) => (l.interviewMethod ? optionLabel("interviewMethod", l.interviewMethod) : "") },
+  { header: "面談希望日 (オンライン)", value: (l) => l.interviewDates.map(formatInterviewDate).join("・") },
+  { header: "面談希望時間帯", value: (l) => (l.interviewTime ? optionLabel("interviewTime", l.interviewTime) : "") },
   { header: "相談したいこと", value: (l) => l.interviewNote ?? "" },
   { header: "対応状況", value: (l) => statusLabel(l.status) },
   { header: "メモ", value: (l) => l.memo },

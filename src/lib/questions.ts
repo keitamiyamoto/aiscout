@@ -204,10 +204,11 @@ export const OPTIONS = {
     { value: "weekend", label: "土日祝" },
     { value: "anytime", label: "いつでも" },
   ],
-  interviewMethod: [
-    { value: "phone", label: "電話" },
-    { value: "online", label: "オンライン (Zoom・Google Meet)" },
-    { value: "line", label: "LINE通話" },
+  interviewTime: [
+    { value: "am", label: "午前 (10〜12時)" },
+    { value: "pm", label: "午後 (13〜17時)" },
+    { value: "night", label: "夜 (18〜21時)" },
+    { value: "any", label: "いつでも" },
   ],
 } as const satisfies Record<string, readonly Opt[]>;
 

@@ -145,18 +145,32 @@ ok("result: market value", /あなたの市場価値は/.test(main) && /万円/.
 ok("result: jobs top3", main.includes("向いている職種 TOP3"));
 ok("result: persona", main.includes("あなたのタイプ"));
 ok("result: casual interview CTA", main.includes("まずはカジュアル面談してみませんか"));
-ok("result: sticky CTA on mobile", await page.locator("text=まずはカジュアル面談してみる (無料)").isVisible());
+ok("result: sticky CTA on mobile", await page.locator("text=無料でオンライン面談してみる").isVisible());
+ok("result: no method choice", (await page.locator("text=ご希望の面談方法").count()) === 0);
+const lineLinks = page.locator('a[href^="https://line.me/R/ti/p/@224pvdvy"]');
+ok("result: LINE buttons", (await lineLinks.count()) >= 2 && (await page.locator("text=まずは公式LINEで質問してみる").count()) >= 1);
 ok("no horizontal scroll on result", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
 await shot(page, "09-result");
 
-// 6. interview
-await page.getByRole("button", { name: "オンライン (Zoom・Google Meet)" }).click();
+// 6. interview: 日付を選ばずに押すとエラー → 3つまで選べる → 送信
+const cta = page.locator("button:has-text('無料でオンラインのカジュアル面談してみる')");
+await cta.click();
+ok("interview needs a date", (await page.locator("text=ご希望の日付を1つ以上選んでください").count()) === 1);
+const dateButtons = page.locator('[aria-label="ご希望の日付"] button');
+ok("14 candidate dates", (await dateButtons.count()) === 14, String(await dateButtons.count()));
+for (const i of [2, 0, 5]) await dateButtons.nth(i).click();
+ok("4th date disabled", await dateButtons.nth(7).isDisabled());
+ok("rank badges", (await page.locator("text=第3希望").count()) >= 1);
+await cta.click();
+ok("interview needs a time", (await page.locator("text=ご希望の時間帯を選んでください").count()) === 1);
+await page.getByRole("button", { name: "夜 (18〜21時)" }).click();
 await page.fill("textarea", "未経験からIT営業に挑戦できるか相談したい");
-await page.click("text=無料でカジュアル面談を申し込む");
+await shot(page, "09b-interview-form");
+await cta.click();
 await page.waitForSelector("text=お申し込みを受け付けました", { timeout: 10000 });
-ok("interview requested", true);
+ok("interview requested", (await page.locator("text=ご希望日：").count()) === 1);
 await page.waitForTimeout(800);
-ok("sticky CTA hidden after request", (await page.locator("text=まずはカジュアル面談してみる (無料)").count()) === 0);
+ok("sticky CTA hidden after request", (await page.locator("text=無料でオンライン面談してみる").count()) === 0);
 await shot(page, "10-interview-done");
 
 // 7. revisit keeps state, top shows last result link

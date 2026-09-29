@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { OPTIONS, PREFECTURES, type OptionKey } from "@/lib/questions";
 import { isKana, validateEmail, validateName, validatePhone } from "@/lib/validate";
+import { MAX_INTERVIEW_DATES, isSelectableDate } from "@/lib/interview-dates";
 
 const values = <K extends OptionKey>(key: K) => OPTIONS[key].map((o) => o.value) as [string, ...string[]];
 const one = (key: OptionKey, message: string) => z.enum(values(key), { error: message });
@@ -62,8 +63,14 @@ export function emptyContact(): ContactDraft {
   return { name: "", nameKana: "", phone: "", email: "", contactTimes: [], consent: false };
 }
 
+/** カジュアル面談 (オンライン) の申込: 候補日を最大3つ + 時間帯 */
 export const interviewSchema = z.object({
-  method: z.enum(values("interviewMethod"), { error: "面談の方法を選んでください" }),
+  dates: z
+    .array(z.string().refine((v) => isSelectableDate(v), "選べない日付が含まれています"))
+    .min(1, "ご希望の日付を1つ以上選んでください")
+    .max(MAX_INTERVIEW_DATES, `日付は${MAX_INTERVIEW_DATES}つまで選べます`)
+    .refine((v) => new Set(v).size === v.length, "同じ日付が重複しています"),
+  time: z.enum(values("interviewTime"), { error: "ご希望の時間帯を選んでください" }),
   note: z.string().trim().max(500, "500文字以内で入力してください").default(""),
 });
 export type InterviewInput = z.infer<typeof interviewSchema>;

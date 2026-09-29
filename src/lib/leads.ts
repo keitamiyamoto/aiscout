@@ -55,7 +55,9 @@ export async function requestInterview(token: string, input: InterviewInput) {
     where: { token },
     data: {
       interviewRequestedAt: new Date(),
-      interviewMethod: input.method,
+      interviewMethod: "online",
+      interviewDates: [...input.dates].sort(),
+      interviewTime: input.time,
       interviewNote: input.note || null,
       status: "new",
     },
