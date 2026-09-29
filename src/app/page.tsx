@@ -44,19 +44,22 @@ function Watermark() {
 
 function FeatureCard({ no, small, big, body, point, sample }: { no: number; small: string; big: string; body: string; point: string; sample: ReactNode }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-md border-2 border-leaf-600 bg-white">
+    // 左右のカードで「見出し・説明・見本・POINT」の行の高さを揃える (親グリッドの行を subgrid で共有)
+    <article className="row-span-4 grid grid-rows-subgrid gap-y-0 overflow-hidden rounded-md border-2 border-leaf-600 bg-white">
       <h3 className="bg-leaf-600 py-3 text-center font-black text-white">
         <span className="text-lg">{no}. </span>
         <span className="text-sm">{small}</span>
         <span className="text-xl">{big}</span>
       </h3>
-      <div className="flex flex-1 flex-col px-5 pb-6 pt-5 sm:px-7">
-        <p className="text-sm leading-7 text-ink-700">{body}</p>
-        <div className="relative mt-5 overflow-hidden rounded-sm border-2 border-leaf-100 bg-white p-4">
+      <p className="px-5 pt-5 text-sm leading-7 text-ink-700 sm:px-7">{body}</p>
+      <div className="px-5 pt-5 sm:px-7">
+        <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-sm border-2 border-leaf-100 bg-white p-4">
           {sample}
           <Watermark />
         </div>
-        <div className="mt-9 flex-1 rounded-sm bg-sand-100 px-5 pb-5">
+      </div>
+      <div className="px-5 pb-6 pt-9 sm:px-7">
+        <div className="h-full rounded-sm bg-sand-100 px-5 pb-5">
           <div className="-mt-5 flex items-end gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-leaf-600 text-[10px] font-black text-white">POINT</span>
             <p className="pb-0.5 font-black text-ink-900">診断結果の活かし方</p>
