@@ -86,7 +86,7 @@ ADMIN_PASSWORD=... node e2e/smoke.mjs   # スクリーンショットは e2e/out
 
 1. Supabase でプロジェクトを作成 (Tokyo リージョン推奨) し、接続文字列を2本取得
 2. Vercel にこのリポジトリを Import。環境変数に `DATABASE_URL` / `DIRECT_URL` / `APP_URL` / `ADMIN_PASSWORD` (+ シート用) を設定
-3. Build Command を `prisma migrate deploy && next build` に変更して Deploy
+3. Build Command は `npm run vercel-build` (scripts/vercel-build.mjs)。`DATABASE_URL` があればテーブルを最新にしてからビルド、無ければプレビュー版としてビルドします
 
 ## 公開前の確認事項
 
