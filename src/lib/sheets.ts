@@ -1,39 +1,52 @@
 import "server-only";
-import { JWT } from "google-auth-library";
 
 /**
- * Google スプレッドシートへ1行追記する。
+ * Google スプレッドシートへの転記 + Chatwork 通知。
+ * スプレッドシートに置いた GAS (docs/gas/sheets-webhook.gs) をウェブアプリとして公開し、そこへ POST する。
+ *
  * 必要な環境変数:
- *   GOOGLE_SHEETS_ID             スプレッドシートのID (URL の /d/ と /edit の間)
- *   GOOGLE_SERVICE_ACCOUNT_EMAIL サービスアカウントのメール (シートに編集者として共有しておく)
- *   GOOGLE_PRIVATE_KEY           サービスアカウントの秘密鍵 (改行は \n でOK)
- *   GOOGLE_SHEETS_RANGE          省略時 "A1" (= いちばん左のシート)。別のシートに書くなら "シート名!A1"
+ *   SHEETS_WEBHOOK_URL    GAS ウェブアプリの URL (https://script.google.com/macros/s/.../exec)
+ *   SHEETS_WEBHOOK_TOKEN  GAS のスクリプトプロパティ WEBHOOK_TOKEN と同じ合言葉
+ *   SHEETS_TAB_NAME       書き込むタブ名 (省略時「市場価値調べるくん」)
  * 未設定なら何もしない (configured: false を返す)。
  */
+export const DEFAULT_TAB_NAME = "市場価値調べるくん";
+
 export function isSheetsConfigured(): boolean {
-  return Boolean(process.env.GOOGLE_SHEETS_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY);
+  return Boolean(process.env.SHEETS_WEBHOOK_URL && process.env.SHEETS_WEBHOOK_TOKEN);
 }
 
-export async function appendSheetRow(values: (string | number)[]): Promise<{ ok: boolean; error?: string; configured: boolean }> {
+export type SheetPayload = {
+  headers: string[];
+  values: (string | number)[];
+  /** Chatwork に送る本文 (null なら通知しない) */
+  notify: string | null;
+};
+
+export async function appendSheetRow(payload: SheetPayload): Promise<{ ok: boolean; error?: string; configured: boolean }> {
   if (!isSheetsConfigured()) return { ok: false, configured: false, error: "not configured" };
-  const sheetId = process.env.GOOGLE_SHEETS_ID!;
-  // シート名を省くと先頭のシートに追記される (日本語環境の「シート1」でも動くように)
-  const range = process.env.GOOGLE_SHEETS_RANGE || "A1";
   try {
-    const client = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    });
-    const { token } = await client.getAccessToken();
-    if (!token) throw new Error("no access token");
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(sheetId)}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
-    const res = await fetch(url, {
+    const res = await fetch(process.env.SHEETS_WEBHOOK_URL!, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ values: [values] }),
+      // GAS は application/json だと事前確認が要るので text/plain で送り、GAS 側で JSON.parse する
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        token: process.env.SHEETS_WEBHOOK_TOKEN,
+        sheet: process.env.SHEETS_TAB_NAME || DEFAULT_TAB_NAME,
+        ...payload,
+      }),
+      redirect: "follow",
+      signal: AbortSignal.timeout(15_000),
     });
-    if (!res.ok) throw new Error(`Sheets API ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    const text = await res.text();
+    if (!res.ok) throw new Error(`GAS ${res.status}: ${text.slice(0, 300)}`);
+    let body: { ok?: boolean; error?: string } = {};
+    try {
+      body = JSON.parse(text);
+    } catch {
+      throw new Error(`GAS の応答が JSON ではありません (公開設定を確認してください): ${text.slice(0, 200)}`);
+    }
+    if (!body.ok) throw new Error(`GAS: ${body.error ?? "unknown error"}`);
     return { ok: true, configured: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

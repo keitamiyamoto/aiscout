@@ -58,21 +58,17 @@ npm run dev                 # http://localhost:3000
 | `DATABASE_URL` / `DIRECT_URL` | PostgreSQL。Supabase なら pooler (6543, `?pgbouncer=true`) / 直接接続 (5432) |
 | `APP_URL` | 公開 URL。シートと CSV の「結果URL」に使う |
 | `ADMIN_USER` / `ADMIN_PASSWORD` | 管理画面の Basic 認証。`ADMIN_PASSWORD` が空なら `/admin` は 404 |
-| `GOOGLE_SHEETS_ID` / `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_PRIVATE_KEY` / `GOOGLE_SHEETS_RANGE` | スプレッドシート転記 (任意)。手順は履歴書作る君の README と同じ |
+| `SHEETS_WEBHOOK_URL` / `SHEETS_WEBHOOK_TOKEN` | スプレッドシート転記 + Chatwork 通知 (任意)。下記「スプレッドシート連携」 |
+| `SHEETS_TAB_NAME` / `CHATWORK_NOTIFY_KINDS` | 書き込むタブ名 (省略時「市場価値調べるくん」) / 通知する区分 (省略時 "診断完了,面談申込") |
 
-スプレッドシートには「診断完了」と「面談申込」のたびに1行ずつ追記されます (列は `src/lib/lead-columns.ts` の `LEAD_COLUMNS`。1行目の見出しもこの順で入れてください)。
-追記先は先頭のシートです (別のシートにするなら `GOOGLE_SHEETS_RANGE="シート名!A1"`)。
+## スプレッドシート連携 (GAS 経由) と Chatwork 通知
 
-### スプレッドシートの見出し (1行目にそのまま貼り付け。タブ区切り)
-
-```
-送信日時	区分	氏名	ふりがな	電話番号	メールアドレス	連絡のつきやすい時間帯	年齢	都道府県	職種	業界	雇用形態	従業員数	経験年数	マネジメント	転職回数	最終学歴	資格	スキル自己評価	現在年収(万円)	希望年収(万円)	転職希望時期	重視すること	市場価値(万円)	想定レンジ	スコア	タイプ	適職1	適職2	適職3	面談申込日時	面談希望日 (オンライン)	面談希望時間帯	相談したいこと	対応状況	メモ	流入元	結果URL	ID
-```
-
-### Chatwork 通知 (GAS)
-
-`docs/gas/chatwork-notify.gs` をスプレッドシートの Apps Script に貼り付けて使います (手順はファイル冒頭)。
-アプリは Sheets API で追記するため onEdit / onChange トリガーは発火しません。1分ごとの時間主導トリガーで新しい行だけを通知します。
+- スプレッドシートに `docs/gas/sheets-webhook.gs` を貼ってウェブアプリとして公開し、その URL と合言葉を Vercel に設定します (手順はファイル冒頭)
+- 「診断完了」と「面談申込」のたびに、タブ「市場価値調べるくん」に1行追記し、同時に Chatwork に通知します
+- 履歴書作る君も同じスプレッドシートの同じ GAS に、タブ「履歴書作る君」として送れます
+- タブが無ければ自動で作り、1行目に見出しを書きます。列は見出し名で合わせるので、並べ替えや右端への列追加をしても大丈夫です
+- 転記に失敗しても診断は止まりません (DB には保存され、失敗内容は `Lead.sheetSyncError` に残ります)
+- Google Cloud のサービスアカウントは不要です
 
 ## 検証コマンド
 
