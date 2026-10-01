@@ -51,6 +51,9 @@ model Lead {
   utmSource       String?
   utmMedium       String?
   utmCampaign     String?
+  /// 広告のクリックID (Google 広告 / Meta)。面談の成約などを後から広告に返すときに使う
+  gclid           String?
+  fbclid          String?
   userAgent       String?
   sheetSyncedAt   DateTime?
   sheetSyncError  String?

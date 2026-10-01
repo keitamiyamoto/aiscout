@@ -47,6 +47,10 @@ await page.locator("text=診断スタート").first().click();
 await page.waitForURL(/\/diagnosis/);
 await page.waitForSelector("text=あなたの年齢を教えてください");
 ok("Q1 shown", true);
+if (process.env.EXPECT_ANALYTICS) {
+  await page.waitForFunction(() => JSON.stringify(window.dataLayer ?? []).includes("diagnosis_start"), null, { timeout: 5000 }).catch(() => {});
+  ok("analytics: gtag diagnosis_start (on first view)", await page.evaluate(() => JSON.stringify(window.dataLayer ?? []).includes("diagnosis_start")));
+}
 await shot(page, "02-q1");
 
 // 2. answer a few, test back
@@ -172,6 +176,19 @@ ok("interview requested", (await page.locator("text=ご希望日：").count()) =
 await page.waitForTimeout(800);
 ok("sticky CTA hidden after request", (await page.locator("text=無料でオンライン面談してみる").count()) === 0);
 await shot(page, "10-interview-done");
+
+// 6b. 計測イベント (ダミーのタグIDでビルドしたときだけ確認する)
+if (process.env.EXPECT_ANALYTICS) {
+  const dl = await page.evaluate(() => JSON.stringify(window.dataLayer ?? []));
+  const fbQueue = await page.evaluate(() => JSON.stringify(window.fbq?.queue ?? []));
+  for (const ev of ["diagnosis_step", "diagnosis_contact_view", "generate_lead", "interview_request", "conversion"]) {
+    ok(`analytics: gtag ${ev}`, dl.includes(`"${ev}"`));
+  }
+  ok("analytics: ads lead conversion label", dl.includes("AW-TEST/LEADLABEL"));
+  ok("analytics: ads interview conversion label", dl.includes("AW-TEST/INTERVIEWLABEL"));
+  ok("analytics: meta Lead + Schedule", fbQueue.includes('"Lead"') && fbQueue.includes('"Schedule"'));
+  ok("analytics: no personal data sent", !/山田|やまだ|taro@example\.com|090-?\d{4}/.test(dl + fbQueue));
+}
 
 // 7. revisit keeps state, top shows last result link
 await page.goto(resultUrl);

@@ -19,10 +19,10 @@ async function syncToSheet(lead: LeadLike, kind: "診断完了" | "面談申込"
 }
 
 export type SubmitResult =
-  | { ok: true; token: string }
+  | { ok: true; token: string; leadId: string; marketValue: number; rank: string }
   | { ok: false; error: string; fieldErrors?: Record<string, string>; answersInvalid?: boolean };
 
-type Meta = { utmSource?: string; utmMedium?: string; utmCampaign?: string; website?: string };
+type Meta = { utmSource?: string; utmMedium?: string; utmCampaign?: string; gclid?: string; fbclid?: string; website?: string };
 
 const MAX_PER_PHONE_PER_HOUR = 3;
 
@@ -41,7 +41,10 @@ export async function submitDiagnosisAction(answersInput: unknown, contactInput:
   }
 
   // プレビューモード (DB 未設定): 保存せず、回答を結果URLに入れて返す
-  if (isPreviewMode()) return { ok: true, token: encodePreviewToken(answers.data, contact.data.name) };
+  if (isPreviewMode()) {
+    const r = diagnose(answers.data);
+    return { ok: true, token: encodePreviewToken(answers.data, contact.data.name), leadId: `preview-${Date.now()}`, marketValue: r.marketValue, rank: r.rank };
+  }
 
   if ((await countRecentByPhone(contact.data.phone)) >= MAX_PER_PHONE_PER_HOUR) {
     return { ok: false, error: "短時間に何度も送信されています。しばらく時間をおいてからお試しください。" };
@@ -53,7 +56,7 @@ export async function submitDiagnosisAction(answersInput: unknown, contactInput:
 
   await syncToSheet(lead, "診断完了");
 
-  return { ok: true, token: lead.token };
+  return { ok: true, token: lead.token, leadId: lead.id, marketValue: result.marketValue, rank: result.rank };
 }
 
 export type InterviewResult = { ok: true } | { ok: false; error: string; fieldErrors?: Record<string, string> };

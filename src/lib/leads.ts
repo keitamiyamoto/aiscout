@@ -5,7 +5,7 @@ import { ENGINE_VERSION, type DiagnosisResult } from "@/lib/engine";
 import type { Answers, Contact, InterviewInput } from "@/lib/schemas";
 import type { LeadStatus } from "@/lib/lead-columns";
 
-export type LeadMeta = { utmSource?: string; utmMedium?: string; utmCampaign?: string; userAgent?: string };
+export type LeadMeta = { utmSource?: string; utmMedium?: string; utmCampaign?: string; gclid?: string; fbclid?: string; userAgent?: string };
 
 export function newToken(): string {
   return randomBytes(18).toString("base64url");
@@ -35,6 +35,8 @@ export async function createLead(answers: Answers, result: DiagnosisResult, cont
       utmSource: meta.utmSource?.slice(0, 100) || null,
       utmMedium: meta.utmMedium?.slice(0, 100) || null,
       utmCampaign: meta.utmCampaign?.slice(0, 100) || null,
+      gclid: meta.gclid?.slice(0, 200) || null,
+      fbclid: meta.fbclid?.slice(0, 300) || null,
       userAgent: meta.userAgent?.slice(0, 300) || null,
     },
   });

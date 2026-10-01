@@ -70,6 +70,33 @@ npm run dev                 # http://localhost:3000
 - 転記に失敗しても診断は止まりません (DB には保存され、失敗内容は `Lead.sheetSyncError` に残ります)
 - Google Cloud のサービスアカウントは不要です
 
+## 計測タグ (GA4 / Google 広告 / Meta ピクセル)
+
+Vercel の環境変数に ID を入れて再デプロイすると、そのタグだけが読み込まれます (未設定のタグは読み込まない)。
+
+| 変数 | 例 | 内容 |
+| --- | --- | --- |
+| `NEXT_PUBLIC_GA_ID` | `G-XXXXXXX` | GA4 の測定 ID |
+| `NEXT_PUBLIC_GOOGLE_ADS_ID` | `AW-123456789` | Google 広告のコンバージョン ID |
+| `NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL` | `AbCdEf...` | コンバージョン「診断完了」のラベル |
+| `NEXT_PUBLIC_GOOGLE_ADS_INTERVIEW_LABEL` | `GhIjKl...` | コンバージョン「面談申込」のラベル |
+| `NEXT_PUBLIC_META_PIXEL_ID` | `1234567890` | Meta ピクセル ID |
+
+送るイベント (氏名・電話・メールは送らない。`/admin` は計測しない):
+
+| タイミング | GA4 | Google 広告 | Meta |
+| --- | --- | --- | --- |
+| 診断を始めた | `diagnosis_start` | — | `DiagnosisStart` (カスタム) |
+| 質問に答えて次へ | `diagnosis_step` (step, question) | — | — |
+| 連絡先の画面まで来た | `diagnosis_contact_view` | — | `ContactView` (カスタム) |
+| **診断完了 (リード)** | `generate_lead` | コンバージョン (LEAD_LABEL) | `Lead` |
+| **面談申込** | `interview_request` | コンバージョン (INTERVIEW_LABEL) | `Schedule` |
+| 公式LINEを押した | `line_click` (place) | — | `Contact` |
+
+- GA4 では `generate_lead` と `interview_request` を「キーイベント」に設定してください
+- 二重計上を防ぐため、コンバージョンには診断ごとの ID を付けて送ります
+- 広告のクリック ID (`gclid` / `fbclid`) と UTM は診断データと一緒に保存し、管理画面の CSV とシートにも出ます。面談の実施や成約を後から広告に返す (オフラインコンバージョン) ときに使えます
+
 ## 検証コマンド
 
 ```bash

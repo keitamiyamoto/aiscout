@@ -7,20 +7,19 @@ import type { ReactNode } from "react";
 import { Mascot } from "@/components/brand/Mascot";
 import { CountUp } from "@/components/result/CountUp";
 import { IncomeBars, ScoreGauge, TraitRadar } from "@/components/result/Charts";
-import { InterviewCta } from "@/components/result/InterviewCta";
+import { InterviewCta, LineLink } from "@/components/result/InterviewCta";
 import { candidateDates } from "@/lib/interview-dates";
-import { BRAND } from "@/lib/brand";
 import { getLeadByToken } from "@/lib/leads";
 import { ENGINE_VERSION, RANK_LABEL, diagnose, type DiagnosisResult } from "@/lib/engine";
 import { answersSchema } from "@/lib/schemas";
 import { decodePreviewToken, isPreviewMode, isPreviewToken } from "@/lib/preview";
 
-type View = { token: string; name: string; phone: string; requested: boolean; result: DiagnosisResult };
+type View = { token: string; leadId: string; name: string; phone: string; requested: boolean; result: DiagnosisResult };
 
 async function loadView(token: string): Promise<View | null> {
   if (isPreviewToken(token)) {
     const p = decodePreviewToken(token);
-    return p ? { token, name: p.name, phone: "", requested: false, result: diagnose(p.answers) } : null;
+    return p ? { token, leadId: "preview", name: p.name, phone: "", requested: false, result: diagnose(p.answers) } : null;
   }
   if (isPreviewMode()) return null;
   const lead = await getLeadByToken(token);
@@ -31,7 +30,7 @@ async function loadView(token: string): Promise<View | null> {
     const answers = answersSchema.safeParse(lead.answers);
     if (answers.success) result = diagnose(answers.data);
   }
-  return { token: lead.token, name: lead.name, phone: lead.phone, requested: Boolean(lead.interviewRequestedAt), result };
+  return { token: lead.token, leadId: lead.id, name: lead.name, phone: lead.phone, requested: Boolean(lead.interviewRequestedAt), result };
 }
 
 /** 青い帯の見出しがついた白い箱 (トップの「分かること」と同じ形) */
@@ -203,7 +202,7 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
 
           {/* カジュアル面談 */}
           <section id="interview" className="scroll-mt-20 pt-2">
-            <InterviewCta token={lead.token} name={firstName} phone={lead.phone} requested={requested} dates={candidateDates()} />
+            <InterviewCta token={lead.token} leadId={lead.leadId} name={firstName} phone={lead.phone} requested={requested} dates={candidateDates()} />
           </section>
 
           <p className="text-center text-xs leading-relaxed text-ink-500">
@@ -218,9 +217,9 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
 
       {!requested && (
         <div className="fixed inset-x-0 bottom-0 z-20 flex gap-2 border-t border-sand-200 bg-white/95 p-3 backdrop-blur sm:hidden" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-          <a href={BRAND.lineUrl} target="_blank" rel="noopener noreferrer" className="flex w-[38%] items-center justify-center rounded-full bg-[#06C755] px-2 py-3 text-sm font-black leading-tight text-white">
+          <LineLink place="sticky_bar" className="flex w-[38%] items-center justify-center rounded-full bg-[#06C755] px-2 py-3 text-sm font-black leading-tight text-white">
             LINEで質問
-          </a>
+          </LineLink>
           <a href="#interview" className="flex flex-1 items-center justify-center rounded-full border-2 border-leaf-600 bg-sun-500 px-3 py-3 text-sm font-black leading-tight text-leaf-700">
             無料でオンライン面談してみる
           </a>

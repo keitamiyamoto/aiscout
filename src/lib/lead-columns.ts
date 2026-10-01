@@ -27,6 +27,8 @@ export type LeadLike = {
   utmSource: string | null;
   utmMedium: string | null;
   utmCampaign: string | null;
+  gclid?: string | null;
+  fbclid?: string | null;
   createdAt: Date;
 };
 
@@ -82,6 +84,8 @@ export const LEAD_COLUMNS: Col[] = [
   { header: "対応状況", value: (l) => statusLabel(l.status) },
   { header: "メモ", value: (l) => l.memo },
   { header: "流入元", value: (l) => [l.utmSource, l.utmMedium, l.utmCampaign].filter(Boolean).join(" / ") },
+  { header: "gclid", value: (l) => l.gclid ?? "" },
+  { header: "fbclid", value: (l) => l.fbclid ?? "" },
   { header: "結果URL", value: (l, _a, _r, c) => `${c.appUrl}/result/${l.token}` },
   { header: "ID", value: (l) => l.id },
 ];

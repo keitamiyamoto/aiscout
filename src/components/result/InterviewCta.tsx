@@ -7,6 +7,7 @@ import { requestInterviewAction } from "@/app/actions/diagnosis";
 import { OPTIONS } from "@/lib/questions";
 import { BRAND } from "@/lib/brand";
 import { MAX_INTERVIEW_DATES, formatInterviewDate, type CandidateDate } from "@/lib/interview-dates";
+import { trackInterviewRequest, trackLineClick } from "@/lib/analytics";
 
 const MERITS = [
   { title: "無理に転職を勧めません", body: "「まだ迷っている」段階でも大丈夫。情報収集だけでもOKです。" },
@@ -16,10 +17,11 @@ const MERITS = [
 ];
 
 /** 公式LINE へのボタン */
-export function LineButton({ className = "" }: { className?: string }) {
+export function LineButton({ className = "", place = "interview" }: { className?: string; place?: string }) {
   return (
     <a
       href={BRAND.lineUrl}
+      onClick={() => trackLineClick(place)}
       target="_blank"
       rel="noopener noreferrer"
       className={`flex w-full items-center justify-center gap-2.5 rounded-full bg-[#06C755] px-6 py-3.5 font-black text-white transition hover:brightness-95 ${className}`}
@@ -33,7 +35,30 @@ export function LineButton({ className = "" }: { className?: string }) {
   );
 }
 
-export function InterviewCta({ token, name, phone, requested, dates }: { token: string; name: string; phone: string; requested: boolean; dates: CandidateDate[] }) {
+/** 画面下の固定バーなど、ボタン以外の見た目で使う公式LINEリンク */
+export function LineLink({ className, children, place }: { className?: string; children: React.ReactNode; place: string }) {
+  return (
+    <a href={BRAND.lineUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick(place)} className={className}>
+      {children}
+    </a>
+  );
+}
+
+export function InterviewCta({
+  token,
+  leadId,
+  name,
+  phone,
+  requested,
+  dates,
+}: {
+  token: string;
+  leadId: string;
+  name: string;
+  phone: string;
+  requested: boolean;
+  dates: CandidateDate[];
+}) {
   const [done, setDone] = useState<string[] | true | null>(requested ? true : null);
   const [picked, setPicked] = useState<string[]>([]);
   const [time, setTime] = useState<string>("");
@@ -52,7 +77,10 @@ export function InterviewCta({ token, name, phone, requested, dates }: { token: 
     start(async () => {
       setError(null);
       const res = await requestInterviewAction(token, { dates: picked, time, note });
-      if (res.ok) setDone(picked);
+      if (res.ok) {
+        trackInterviewRequest(leadId, picked.length);
+        setDone(picked);
+      }
       else setError(res.fieldErrors ? Object.values(res.fieldErrors)[0] : res.error);
     });
   };
@@ -76,7 +104,7 @@ export function InterviewCta({ token, name, phone, requested, dates }: { token: 
         <p className="mt-3 text-xs text-ink-500">知らない番号からの着信になる場合があります。出られなかった場合はSMSでもご連絡します。</p>
         <div className="mx-auto mt-6 max-w-sm">
           <p className="mb-2 text-xs font-bold text-ink-700">面談の前に聞きたいことがあれば</p>
-          <LineButton />
+          <LineButton place="interview_done" />
         </div>
       </div>
     );

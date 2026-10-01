@@ -6,7 +6,7 @@ const LAST_KEY = "aiscout:last";
 const UTM_KEY = "aiscout:utm";
 
 export type Draft = { answers: AnswersDraft; contact: Omit<ContactDraft, "consent">; updatedAt: number };
-export type Utm = { utmSource?: string; utmMedium?: string; utmCampaign?: string };
+export type Utm = { utmSource?: string; utmMedium?: string; utmCampaign?: string; gclid?: string; fbclid?: string };
 
 function read<T>(storage: () => Storage, key: string): T | null {
   try {
@@ -40,8 +40,10 @@ export function captureUtm(search: string) {
     utmSource: p.get("utm_source") ?? undefined,
     utmMedium: p.get("utm_medium") ?? undefined,
     utmCampaign: p.get("utm_campaign") ?? undefined,
+    gclid: p.get("gclid") ?? undefined,
+    fbclid: p.get("fbclid") ?? undefined,
   };
-  if (utm.utmSource || utm.utmMedium || utm.utmCampaign) write(session, UTM_KEY, utm);
+  if (Object.values(utm).some(Boolean)) write(session, UTM_KEY, utm);
 }
 export const loadUtm = () => read<Utm>(session, UTM_KEY) ?? {};
 

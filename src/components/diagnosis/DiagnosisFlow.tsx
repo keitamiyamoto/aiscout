@@ -9,8 +9,9 @@ import { ContactForm } from "@/components/diagnosis/ContactForm";
 import { Analyzing } from "@/components/diagnosis/Analyzing";
 import { QUESTIONS, SECTIONS, type Question } from "@/lib/questions";
 import { emptyContact, type AnswersDraft, type ContactDraft } from "@/lib/schemas";
-import { answeredCount, clearDraft, loadDraft, loadUtm, saveDraft, saveLastToken } from "@/lib/draft";
+import { answeredCount, captureUtm, clearDraft, loadDraft, loadUtm, saveDraft, saveLastToken } from "@/lib/draft";
 import { submitDiagnosisAction } from "@/app/actions/diagnosis";
+import { trackContactView, trackDiagnosisStart, trackDiagnosisStep, trackLead } from "@/lib/analytics";
 
 const KEYS = QUESTIONS.map((q) => q.key);
 const MIN_ANALYZING_MS = 2800;
@@ -38,7 +39,15 @@ export default function DiagnosisFlow() {
   const [dir, setDir] = useState<"next" | "prev">("next");
   useEffect(() => {
     advancing.current = false;
+    // 計測: どの質問まで進んだか (離脱の分析用)。個人情報は送らない
+    if (step === QUESTIONS.length) trackContactView();
+    else if (step > 0) trackDiagnosisStep(step, KEYS[step - 1]);
   }, [step]);
+  useEffect(() => {
+    // 広告から診断ページに直接来た場合も、流入元とクリックIDを残す
+    captureUtm(window.location.search);
+    if (answeredCount(initial?.answers ?? {}, KEYS) === 0) trackDiagnosisStart();
+  }, [initial]);
   useEffect(() => {
     // ブラウザの「戻る」「進む」でもアニメーションの向きを合わせる
     const onPop = () => setDir("prev");
@@ -76,6 +85,7 @@ export default function DiagnosisFlow() {
       const res = await submitDiagnosisAction(answers, contact, { ...loadUtm(), website: honeypot });
       const wait = MIN_ANALYZING_MS - (Date.now() - started);
       if (res.ok) {
+        trackLead(res.leadId, { marketValue: res.marketValue, rank: res.rank, jobCategory: answers.jobCategory });
         if (wait > 0) await new Promise((r) => setTimeout(r, wait));
         saveLastToken(res.token);
         clearDraft();
