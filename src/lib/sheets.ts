@@ -7,7 +7,7 @@ import { JWT } from "google-auth-library";
  *   GOOGLE_SHEETS_ID             スプレッドシートのID (URL の /d/ と /edit の間)
  *   GOOGLE_SERVICE_ACCOUNT_EMAIL サービスアカウントのメール (シートに編集者として共有しておく)
  *   GOOGLE_PRIVATE_KEY           サービスアカウントの秘密鍵 (改行は \n でOK)
- *   GOOGLE_SHEETS_RANGE          省略時 "Sheet1!A1"
+ *   GOOGLE_SHEETS_RANGE          省略時 "A1" (= いちばん左のシート)。別のシートに書くなら "シート名!A1"
  * 未設定なら何もしない (configured: false を返す)。
  */
 export function isSheetsConfigured(): boolean {
@@ -17,7 +17,8 @@ export function isSheetsConfigured(): boolean {
 export async function appendSheetRow(values: (string | number)[]): Promise<{ ok: boolean; error?: string; configured: boolean }> {
   if (!isSheetsConfigured()) return { ok: false, configured: false, error: "not configured" };
   const sheetId = process.env.GOOGLE_SHEETS_ID!;
-  const range = process.env.GOOGLE_SHEETS_RANGE || "Sheet1!A1";
+  // シート名を省くと先頭のシートに追記される (日本語環境の「シート1」でも動くように)
+  const range = process.env.GOOGLE_SHEETS_RANGE || "A1";
   try {
     const client = new JWT({
       email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
