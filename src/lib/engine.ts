@@ -11,8 +11,9 @@ import type { Answers } from "@/lib/schemas";
  *    適職は現職の経験を重く見て、似た職種ばかり並ばないようにする
  * 4: 経験を活かせる職種の想定年収をいまの市場価値に寄せる、年収が大きく下がる職種を控えめにする、
  *    経営企画・事業企画を追加 (5人以上のマネジメント経験がある人向け)
+ * 5: 働いていない人に「いまより+◯万円」を出さない、1位の職種の年収が市場価値より低いときの文言を変更
  */
-export const ENGINE_VERSION = 4;
+export const ENGINE_VERSION = 5;
 
 /* ------------------------------------------------------------------ */
 /* 係数表                                                              */
@@ -472,26 +473,40 @@ export function diagnose(a: Answers): DiagnosisResult {
   const persona = { key: top, ...PERSONA[top] };
   const jobs = matchJobs(a, traits, skill + qualification + achievement, marketValue);
 
-  const diff = marketValue - current;
+  // 働いていない人の「いまの年収」は入力の下限 (100万) が入るだけなので、比較には使わない
+  const working = a.employmentType !== "none";
+  const shownCurrent = working ? current : 0;
+  const diff = marketValue - shownCurrent;
   const best = jobs[0];
   const ceiling = Math.max(high, best?.incomeHigh ?? 0);
   const upside = ceiling - current;
   const desired = a.desiredIncome;
   const desiredVerdict =
-    desired <= ceiling ? "十分に狙える水準です" : desired <= ceiling * 1.15 ? "条件交渉やキャリアの見せ方次第で狙えます" : "職種・業界を選べば中長期で目指せます";
+    desired <= Math.max(ceiling, shownCurrent)
+      ? "十分に狙える水準です"
+      : desired <= ceiling * 1.15
+        ? "条件交渉やキャリアの見せ方次第で狙えます"
+        : "職種・業界を選べば中長期で目指せます";
   const comment =
     `${persona.name}のあなたの市場価値は年収${low}〜${high}万円が目安です。` +
-    (best ? `${best.name}なら${best.incomeLow}〜${best.incomeHigh}万円も目指せます。` : "") +
-    (current > 0 && upside > 0
-      ? `転職の進め方次第で、いまより最大+${upside}万円の年収アップが見込めます。`
-      : "いまの年収は市場水準より高めです。条件を落とさずに、より働きやすい職場を選べる可能性があります。");
+    // 1位の職種の年収が市場価値より上のときだけ「も目指せます」と書く
+    (best
+      ? best.incomeHigh > high
+        ? `${best.name}なら${best.incomeLow}〜${best.incomeHigh}万円も目指せます。`
+        : `いちばん向いているのは${best.name}です。`
+      : "") +
+    (!working
+      ? "ブランクがあっても、この水準の求人から十分に狙えます。"
+      : upside > 0
+        ? `転職の進め方次第で、いまより最大+${upside}万円の年収アップが見込めます。`
+        : "いまの年収は市場水準より高めです。条件を落とさずに、より働きやすい職場を選べる可能性があります。");
 
   return {
     version: ENGINE_VERSION,
     marketValue,
     low,
     high,
-    currentIncome: current,
+    currentIncome: shownCurrent,
     diff,
     peerAverage,
     score,

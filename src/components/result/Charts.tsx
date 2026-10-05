@@ -44,7 +44,7 @@ export function IncomeBars({ r }: { r: DiagnosisResult }) {
     { label: "いまの年収", value: r.currentIncome, tone: "bg-ink-300" },
     { label: "あなたの市場価値", value: r.marketValue, tone: "bg-leaf-600" },
     { label: "同年代の平均", value: r.peerAverage, tone: "bg-sun-500" },
-  ];
+  ].filter((row) => row.label !== "いまの年収" || row.value > 0); // 働いていない人は「いまの年収」を出さない
   const max = Math.max(...rows.map((x) => x.value), 1) * 1.1;
   return (
     <div className="space-y-3.5">

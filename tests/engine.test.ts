@@ -93,6 +93,23 @@ describe("diagnose", () => {
     expect(senior.score).toBeGreaterThan(junior.score);
   });
 
+  it("働いていない人には「いまの年収」との比較を出さない", () => {
+    const r = diagnose({ ...SAMPLE, employmentType: "none", currentIncome: 100 });
+    expect(r.currentIncome).toBe(0);
+    expect(r.comment).not.toContain("いまより");
+    expect(r.comment).toContain("ブランク");
+  });
+
+  it("1位の職種の年収が市場価値より低いときは「も目指せます」と書かない", () => {
+    const r = diagnose({ ...SAMPLE, currentIncome: 1500 });
+    if (r.jobs[0].incomeHigh <= r.high) expect(r.comment).not.toContain("も目指せます");
+  });
+
+  it("希望年収がいまの年収以下なら「十分に狙える」", () => {
+    const r = diagnose({ ...SAMPLE, currentIncome: 1500, desiredIncome: 1400 });
+    expect(r.desiredVerdict).toBe("十分に狙える水準です");
+  });
+
   it("働いていない場合も結果を返す", () => {
     const r = diagnose({ ...SAMPLE, employmentType: "none", currentIncome: 0 });
     expect(r.marketValue).toBeGreaterThan(200);
