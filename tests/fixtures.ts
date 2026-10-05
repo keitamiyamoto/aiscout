@@ -28,7 +28,14 @@ export const SAMPLE: Answers = {
 };
 
 let seed = 42;
-const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+/** mulberry32 (以前の線形合同法は浮動小数の桁あふれで 2万回中 300通り程度しか出ていなかった) */
+const rnd = () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = seed;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
 const pick = <T,>(a: readonly T[]) => a[Math.floor(rnd() * a.length)];
 const vals = (k: keyof typeof OPTIONS) => OPTIONS[k].map((o) => o.value);
 

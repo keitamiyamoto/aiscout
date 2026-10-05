@@ -5,8 +5,12 @@
  */
 import type { Answers } from "@/lib/schemas";
 
-/** 2: スコアを同条件の人の中でのパーセンタイルに変更 */
-export const ENGINE_VERSION = 2;
+/**
+ * 2: スコアを同条件の人の中でのパーセンタイルに変更
+ * 3: スコアを「同年代 (全職種・全国)」の年収分布の中での順位に変更、いまの年収の重みを上げる、
+ *    適職は現職の経験を重く見て、似た職種ばかり並ばないようにする
+ */
+export const ENGINE_VERSION = 3;
 
 /* ------------------------------------------------------------------ */
 /* 係数表                                                              */
@@ -183,8 +187,12 @@ const SKILL_TRAITS: Record<SkillKey, Partial<TraitScore>> = {
   english: {},
 };
 
+/** 職種のグループ。TOP3 が同じグループばかりにならないようにする */
+type CareerFamily = "sales" | "support" | "backoffice" | "it" | "creative" | "field" | "store" | "care" | "consulting";
+
 type Career = {
   name: string;
+  family: CareerFamily;
   weights: Partial<TraitScore>;
   base: number;
   /** 経験を活かせる現職の職種 */
@@ -198,26 +206,26 @@ type Career = {
 };
 
 export const CAREERS = {
-  corporateSales: { name: "法人営業", weights: { people: 3, lead: 1 }, base: 480, from: ["sales", "service"], priorities: ["income", "growth"], interests: ["money", "digital", "living"], skills: ["sales"], entry: true },
-  itSales: { name: "IT営業・インサイドセールス", weights: { people: 2, analytic: 1 }, base: 500, from: ["sales"], priorities: ["income", "growth", "freedom"], interests: ["digital"], skills: ["sales"], entry: true },
-  customerSuccess: { name: "カスタマーサクセス", weights: { people: 2, analytic: 1, precise: 1 }, base: 450, from: ["sales", "service", "office"], priorities: ["balance", "growth"], interests: ["digital", "people"], skills: ["sales", "hospitality"], entry: true },
-  careerAdvisor: { name: "キャリアアドバイザー", weights: { people: 3, lead: 1 }, base: 430, from: ["sales", "service"], priorities: ["growth", "income"], interests: ["people"], skills: ["sales", "hospitality"], entry: true },
-  storeManager: { name: "店長・エリアマネージャー", weights: { lead: 3, people: 2, hands: 1 }, base: 420, from: ["service", "food"], priorities: ["income"], interests: ["trend", "living"], skills: ["hospitality", "management"], entry: false },
-  realEstateSales: { name: "不動産営業", weights: { people: 2, lead: 1, hands: 1 }, base: 470, from: ["sales"], priorities: ["income"], interests: ["living", "money"], qualifications: ["takken"], skills: ["sales"], entry: true },
-  webMarketer: { name: "Webマーケター", weights: { analytic: 2, creative: 2 }, base: 480, from: ["marketing", "creative"], priorities: ["growth", "freedom"], interests: ["digital", "trend"], skills: ["marketing", "writing"], entry: false },
-  planner: { name: "企画・商品開発", weights: { creative: 3, analytic: 1 }, base: 520, from: ["marketing", "creative", "manufacturing"], priorities: ["growth"], interests: ["making", "trend"], skills: ["marketing"], entry: false },
-  engineer: { name: "ITエンジニア (開発)", weights: { analytic: 3, creative: 1, precise: 1 }, base: 520, from: ["engineer"], priorities: ["income", "growth", "freedom"], interests: ["digital"], qualifications: ["itcert"], skills: ["programming"], entry: true },
-  infraEngineer: { name: "インフラエンジニア", weights: { analytic: 2, precise: 2 }, base: 480, from: ["engineer"], priorities: ["stability", "growth"], interests: ["digital"], qualifications: ["itcert"], skills: ["programming"], entry: true },
-  dataAnalyst: { name: "データアナリスト", weights: { analytic: 3, precise: 1 }, base: 540, from: ["engineer", "marketing"], priorities: ["growth", "freedom"], interests: ["digital", "money"], skills: ["programming", "marketing"], entry: false },
-  webDesigner: { name: "Webデザイナー", weights: { creative: 3, precise: 1 }, base: 420, from: ["creative"], priorities: ["freedom", "growth"], interests: ["digital", "trend"], skills: ["design"], entry: false },
-  hr: { name: "人事・採用", weights: { people: 2, lead: 1, precise: 1 }, base: 460, from: ["backoffice"], priorities: ["stability", "balance"], interests: ["people"], entry: false },
-  accounting: { name: "経理・財務", weights: { precise: 3, analytic: 1 }, base: 450, from: ["backoffice", "office"], priorities: ["stability", "balance"], interests: ["money"], qualifications: ["boki"], skills: ["accounting"], entry: false },
-  officeWork: { name: "営業事務・一般事務", weights: { precise: 2, people: 1 }, base: 330, from: ["office", "backoffice"], priorities: ["balance", "stability"], interests: ["people", "money"], qualifications: ["mos"], skills: ["office"], entry: true },
-  constructionManager: { name: "施工管理", weights: { lead: 2, hands: 2, precise: 1 }, base: 500, from: ["construction"], priorities: ["income", "stability"], interests: ["living", "making"], qualifications: ["tech"], entry: true },
-  qualityControl: { name: "生産管理・品質管理", weights: { precise: 2, analytic: 1, hands: 1 }, base: 440, from: ["manufacturing"], priorities: ["stability", "balance"], interests: ["making"], qualifications: ["tech"], entry: true },
-  consultant: { name: "コンサルタント", weights: { analytic: 3, people: 1, lead: 1 }, base: 650, from: ["consultant"], priorities: ["income", "growth"], interests: ["money", "digital"], skills: ["project", "english"], entry: false },
-  careWorker: { name: "介護・福祉職", weights: { people: 3, hands: 1 }, base: 360, from: ["medical"], priorities: ["stability"], interests: ["health", "people"], qualifications: ["care"], entry: true },
-  logistics: { name: "物流・運行管理", weights: { hands: 2, precise: 1 }, base: 420, from: ["logistics"], priorities: ["stability", "balance"], interests: ["living"], qualifications: ["license"], entry: true },
+  corporateSales: { name: "法人営業", family: "sales", weights: { people: 3, lead: 1 }, base: 480, from: ["sales", "service"], priorities: ["income", "growth"], interests: ["money", "digital", "living"], skills: ["sales"], entry: true },
+  itSales: { name: "IT営業・インサイドセールス", family: "sales", weights: { people: 2, analytic: 1 }, base: 500, from: ["sales"], priorities: ["income", "growth", "freedom"], interests: ["digital"], skills: ["sales"], entry: true },
+  customerSuccess: { name: "カスタマーサクセス", family: "support", weights: { people: 2, analytic: 1, precise: 1 }, base: 450, from: ["sales", "service", "office"], priorities: ["balance", "growth"], interests: ["digital", "people"], skills: ["sales", "hospitality"], entry: true },
+  careerAdvisor: { name: "キャリアアドバイザー", family: "sales", weights: { people: 3, lead: 1 }, base: 430, from: ["sales", "service"], priorities: ["growth", "income"], interests: ["people"], skills: ["sales", "hospitality"], entry: true },
+  storeManager: { name: "店長・エリアマネージャー", family: "store", weights: { lead: 3, people: 2, hands: 1 }, base: 420, from: ["service", "food"], priorities: ["income"], interests: ["trend", "living"], skills: ["hospitality", "management"], entry: false },
+  realEstateSales: { name: "不動産営業", family: "sales", weights: { people: 2, lead: 1, hands: 1 }, base: 470, from: ["sales"], priorities: ["income"], interests: ["living", "money"], qualifications: ["takken"], skills: ["sales"], entry: true },
+  webMarketer: { name: "Webマーケター", family: "creative", weights: { analytic: 2, creative: 2 }, base: 480, from: ["marketing", "creative"], priorities: ["growth", "freedom"], interests: ["digital", "trend"], skills: ["marketing", "writing"], entry: false },
+  planner: { name: "企画・商品開発", family: "creative", weights: { creative: 3, analytic: 1 }, base: 520, from: ["marketing", "creative", "manufacturing"], priorities: ["growth"], interests: ["making", "trend"], skills: ["marketing"], entry: false },
+  engineer: { name: "ITエンジニア (開発)", family: "it", weights: { analytic: 3, creative: 1, precise: 1 }, base: 520, from: ["engineer"], priorities: ["income", "growth", "freedom"], interests: ["digital"], qualifications: ["itcert"], skills: ["programming"], entry: true },
+  infraEngineer: { name: "インフラエンジニア", family: "it", weights: { analytic: 2, precise: 2 }, base: 480, from: ["engineer"], priorities: ["stability", "growth"], interests: ["digital"], qualifications: ["itcert"], skills: ["programming"], entry: true },
+  dataAnalyst: { name: "データアナリスト", family: "it", weights: { analytic: 3, precise: 1 }, base: 540, from: ["engineer", "marketing"], priorities: ["growth", "freedom"], interests: ["digital", "money"], skills: ["programming", "marketing"], entry: false },
+  webDesigner: { name: "Webデザイナー", family: "creative", weights: { creative: 3, precise: 1 }, base: 420, from: ["creative"], priorities: ["freedom", "growth"], interests: ["digital", "trend"], skills: ["design"], entry: false },
+  hr: { name: "人事・採用", family: "backoffice", weights: { people: 2, lead: 1, precise: 1 }, base: 460, from: ["backoffice"], priorities: ["stability", "balance"], interests: ["people"], entry: false },
+  accounting: { name: "経理・財務", family: "backoffice", weights: { precise: 3, analytic: 1 }, base: 450, from: ["backoffice", "office"], priorities: ["stability", "balance"], interests: ["money"], qualifications: ["boki"], skills: ["accounting"], entry: false },
+  officeWork: { name: "営業事務・一般事務", family: "support", weights: { precise: 2, people: 1 }, base: 330, from: ["office", "backoffice"], priorities: ["balance", "stability"], interests: ["people", "money"], qualifications: ["mos"], skills: ["office"], entry: true },
+  constructionManager: { name: "施工管理", family: "field", weights: { lead: 2, hands: 2, precise: 1 }, base: 500, from: ["construction"], priorities: ["income", "stability"], interests: ["living", "making"], qualifications: ["tech"], entry: true },
+  qualityControl: { name: "生産管理・品質管理", family: "field", weights: { precise: 2, analytic: 1, hands: 1 }, base: 440, from: ["manufacturing"], priorities: ["stability", "balance"], interests: ["making"], qualifications: ["tech"], entry: true },
+  consultant: { name: "コンサルタント", family: "consulting", weights: { analytic: 3, people: 1, lead: 1 }, base: 650, from: ["consultant"], priorities: ["income", "growth"], interests: ["money", "digital"], skills: ["project", "english"], entry: false },
+  careWorker: { name: "介護・福祉職", family: "care", weights: { people: 3, hands: 1 }, base: 360, from: ["medical"], priorities: ["stability"], interests: ["health", "people"], qualifications: ["care"], entry: true },
+  logistics: { name: "物流・運行管理", family: "field", weights: { hands: 2, precise: 1 }, base: 420, from: ["logistics"], priorities: ["stability", "balance"], interests: ["living"], qualifications: ["license"], entry: true },
 } as const satisfies Record<string, Career>;
 export type CareerKey = keyof typeof CAREERS;
 
@@ -229,12 +237,12 @@ export type Rank = "S" | "A" | "B" | "C" | "D";
 export const RANK_LABEL: Record<Rank, string> = { S: "トップクラス", A: "かなり高い", B: "平均的", C: "平均よりやや下", D: "伸びしろ大" };
 
 /**
- * 「市場価値 ÷ 同年代のよくある人の市場価値」の対数の平均と標準偏差。
- * 年代と経歴の組み合わせが現実的なランダム回答 (tests/fixtures.ts) 2万件で測った値。
- * 係数表を変えて tests/engine.test.ts の分布テストが落ちたら測り直してください。
+ * 同年代 (全職種・全国・フルタイム) の平均年収 (万円)。
+ * 賃金構造基本統計調査 (一般労働者・男女計) の所定内給与 × 12 + 賞与 をもとにした目安。
  */
-export const PEER_LOG_MEAN = -0.03;
-export const PEER_LOG_SD = 0.12;
+export const AGE_AVERAGE_INCOME: Record<Answers["age"], number> = { u25: 310, "25": 380, "30": 440, "35": 490, "40": 530, "45": 560, "50": 590 };
+/** 同年代の中での年収のばらつき (対数の標準偏差)。上位10% ≒ 平均の約1.4倍、下位10% ≒ 平均の約0.6倍 */
+export const AGE_INCOME_LOG_SD = 0.33;
 
 /** スコア (パーセンタイル) からランク。S=上位10% / A=上位30% / B=上位60% / C=上位85% / D=それ以外 */
 export function rankOf(score: number): Rank {
@@ -260,7 +268,7 @@ export type DiagnosisResult = {
   currentIncome: number;
   diff: number;
   peerAverage: number;
-  /** 同年代・同職種・同エリアの中でのパーセンタイル (1〜99) */
+  /** 同年代 (全職種・全国) の中でのパーセンタイル (1〜99) */
   score: number;
   rank: Rank;
   /** 上位何% か (旧バージョンの結果には無い) */
@@ -337,10 +345,12 @@ export function matchJobs(a: Answers, traits: TraitScore, bonus: number, limit =
       fit +
       (priorityHit ? 0.12 : 0) +
       Math.min(2, interestHits.length) * 0.08 +
-      (experienced ? 0.12 : 0) +
+      (experienced ? 0.35 : 0) +
       (qualHit ? 0.08 : 0) +
       (skillHit ? 0.08 : 0) +
-      (!experienced && !c.entry ? -0.1 : 0);
+      (!experienced && !c.entry ? -0.1 : 0) +
+      // 未経験で、興味分野にも資格にも結びつかない職種は控えめに出す
+      (!experienced && interestHits.length === 0 && !qualHit ? -0.1 : 0);
 
     const topTraits = (Object.entries(c.weights) as [Trait, number][])
       .sort((x, y) => traits[y[0]] * y[1] - traits[x[0]] * x[1])
@@ -355,11 +365,25 @@ export function matchJobs(a: Answers, traits: TraitScore, bonus: number, limit =
     else if (qualHit) parts.push("お持ちの資格が評価されます。");
 
     const [incomeLow, incomeHigh] = careerIncome(c, a, experienced, bonus);
-    return { key, name: c.name, total, incomeLow, incomeHigh, reason: parts.join(""), experienced };
+    return { key, name: c.name, family: c.family, total, incomeLow, incomeHigh, reason: parts.join(""), experienced };
   });
-  scored.sort((x, y) => y.total - x.total);
-  return scored.slice(0, limit).map(({ total, ...rest }) => ({ ...rest, match: clamp(Math.round(68 + total * 20), 60, 98) }));
+  // 上から順に選ぶ。すでに選んだのと同じグループの職種は減点し、TOP3 が似た職種だけにならないようにする
+  const picked: typeof scored = [];
+  const remaining = [...scored];
+  while (picked.length < limit && remaining.length) {
+    const adjusted = (j: (typeof scored)[number]) => j.total - FAMILY_REPEAT_PENALTY * picked.filter((p) => p.family === j.family).length;
+    remaining.sort((x, y) => adjusted(y) - adjusted(x));
+    picked.push(remaining.shift()!);
+  }
+  // 似た職種を避けて順番を入れ替えたときも、表示する相性 % が上から順に下がるようにする
+  let prev = 98;
+  return picked.map(({ key, name, incomeLow, incomeHigh, reason, experienced, total }) => {
+    const match = (prev = Math.min(prev, clamp(Math.round(68 + total * 20), 60, 98)));
+    return { key, name, incomeLow, incomeHigh, reason, experienced, match };
+  });
 }
+/** 同じグループの職種を2つ目以降に選ぶときの減点 */
+const FAMILY_REPEAT_PENALTY = 0.25;
 
 /** 係数を掛け合わせた想定年収 (現在の年収を加味する前) */
 function modelIncome(a: Answers, bonus: number): number {
@@ -376,36 +400,6 @@ function modelIncome(a: Answers, bonus: number): number {
     regionFactor(a.prefecture) *
     (1 + bonus)
   );
-}
-
-/** 年代ごとの「よくある経歴」(経験年数・役職) */
-const TYPICAL_BY_AGE: Record<Answers["age"], Pick<Answers, "jobYears" | "management">> = {
-  u25: { jobYears: "1", management: "none" },
-  "25": { jobYears: "3", management: "none" },
-  "30": { jobYears: "3", management: "leader" },
-  "35": { jobYears: "5", management: "leader" },
-  "40": { jobYears: "5", management: "leader" },
-  "45": { jobYears: "10", management: "manager" },
-  "50": { jobYears: "10", management: "manager" },
-};
-/** よくある人のスキル・資格・実績の上乗せ (スキル少し + 免許 + 実績ひとつ程度) */
-const TYPICAL_BONUS = 0.05;
-
-/**
- * 同年代・同職種・同エリアの「よくある経歴の人」の市場価値。
- * 経験年数と役職は年代相応、会社・業界・学歴・雇用形態は平均的 (正社員) とみなす。
- */
-export function peerIncome(a: Answers): number {
-  const typical: Answers = {
-    ...a,
-    ...TYPICAL_BY_AGE[a.age],
-    companySize: "unknown",
-    industry: "other",
-    education: "university",
-    employmentType: "fulltime",
-    jobChanges: "1",
-  };
-  return modelIncome(typical, TYPICAL_BONUS);
 }
 
 export function diagnose(a: Answers): DiagnosisResult {
@@ -431,18 +425,19 @@ export function diagnose(a: Answers): DiagnosisResult {
 
   const model = modelIncome(a, skill + qualification + achievement);
 
-  // 現在の年収も加味する (働いていない・極端に低い場合は重みを下げる)
+  // 現在の年収も加味する。実際にもらっている年収は市場の評価そのものなので半分の重みで見る
+  // (働いていない・パートの場合は重みを下げる)。
+  // 年収の額で重みを切り替えると「年収が低い方が市場価値が高い」逆転が起きるので、雇用形態だけで決める
   const current = a.currentIncome;
-  const lowWeight = a.employmentType === "none" || a.employmentType === "parttime" || current < model * 0.5;
-  const currentWeight = lowWeight ? 0.15 : 0.35;
+  const currentWeight = a.employmentType === "none" || a.employmentType === "parttime" ? 0.15 : 0.5;
   const marketValue = round10(model * (1 - currentWeight) + current * currentWeight);
   const low = round10(marketValue * 0.9);
   const high = round10(marketValue * 1.12);
-  // 同年代・同職種・同エリアの「真ん中の人」と比べる。
-  // スコア = その中での順位 (パーセンタイル)。例: 70 なら上位30%
-  const peer = peerIncome(a) * Math.exp(PEER_LOG_MEAN);
-  const peerAverage = round10(peer);
-  const score = clamp(Math.round(100 * normalCdf(Math.log(marketValue / peer) / PEER_LOG_SD)), 1, 99);
+  // 同年代 (全職種・全国) の年収分布の中での順位 (パーセンタイル)。例: 70 なら上位30%
+  // 平均年収から対数正規分布の中央値を出して比べる
+  const peerAverage = AGE_AVERAGE_INCOME[a.age];
+  const peerMedian = peerAverage * Math.exp(-(AGE_INCOME_LOG_SD ** 2) / 2);
+  const score = clamp(Math.round(100 * normalCdf(Math.log(marketValue / peerMedian) / AGE_INCOME_LOG_SD)), 1, 99);
   const rank = rankOf(score);
   const topPercent = Math.max(1, 100 - score);
 

@@ -31,7 +31,7 @@ export function ScoreGauge({ score, rank, label, topPercent }: { score: number; 
       </p>
       {topPercent !== undefined && (
         <p className="mt-1 text-center text-xs text-ink-500">
-          同年代・同職種・同エリアの中で <span className="font-black text-ink-900">上位{topPercent}%</span>
+          同年代の中で <span className="font-black text-ink-900">上位{topPercent}%</span>
         </p>
       )}
     </div>
@@ -43,7 +43,7 @@ export function IncomeBars({ r }: { r: DiagnosisResult }) {
   const rows = [
     { label: "いまの年収", value: r.currentIncome, tone: "bg-ink-300" },
     { label: "あなたの市場価値", value: r.marketValue, tone: "bg-leaf-600" },
-    { label: "同年代・同職種の平均", value: r.peerAverage, tone: "bg-sun-500" },
+    { label: "同年代の平均", value: r.peerAverage, tone: "bg-sun-500" },
   ];
   const max = Math.max(...rows.map((x) => x.value), 1) * 1.1;
   return (
