@@ -235,7 +235,7 @@ export const QUESTIONS = [
   { key: "strength", section: "style", kind: "single", title: "自分の得意なことは？", options: OPTIONS.strength, columns: 2 },
   { key: "reputation", section: "style", kind: "single", title: "周りの人からよく言われるのは？", options: OPTIONS.reputation },
   { key: "workStyle", section: "style", kind: "single", title: "理想の働き方に近いのは？", options: OPTIONS.workStyle },
-  { key: "interests", section: "style", kind: "multi", title: "興味のある分野は？", hint: "3つまで選べます", options: OPTIONS.interests, min: 1, max: 3 },
+  { key: "interests", section: "style", kind: "multi", title: "興味のある分野は？", hint: "当てはまるものを選んでください", options: OPTIONS.interests, min: 1, max: 3 },
   { key: "priority", section: "future", kind: "single", title: "次の職場でいちばん重視したいことは？", options: OPTIONS.priority },
   { key: "desiredIncome", section: "future", kind: "income", title: "希望する年収は？", hint: "おおよそで大丈夫です", min: 100, max: 1500, step: 10, initial: 400 },
   { key: "timing", section: "future", kind: "single", title: "転職を考えている時期は？", options: OPTIONS.timing },

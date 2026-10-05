@@ -135,7 +135,10 @@ export default function DiagnosisFlow() {
       <div key={step} className={`${dir === "next" ? "slide-next" : "slide-prev"} mt-4`}>
         {q ? (
           <>
-            <p className="font-display text-sm font-bold text-leaf-700">Q{step + 1}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-display text-sm font-bold text-leaf-700">Q{step + 1}</p>
+              <AnswerTypeBadge q={q} />
+            </div>
             <Heading className="mt-1 text-2xl leading-snug sm:text-3xl">{q.title}</Heading>
             {q.hint && <p className="mt-2 text-sm text-ink-500">{q.hint}</p>}
             <div className="mt-6">
@@ -168,6 +171,18 @@ export default function DiagnosisFlow() {
       </div>
     </main>
   );
+}
+
+/** 1つだけ選ぶ質問か、複数選べる質問かを質問番号の横に出す */
+function AnswerTypeBadge({ q }: { q: Question }) {
+  const base = "rounded-full px-2.5 py-0.5 text-xs font-bold";
+  if (q.kind === "single" || q.kind === "prefecture") {
+    return <span className={`${base} border border-leaf-600 bg-white text-leaf-700`}>1つ選択</span>;
+  }
+  if (q.kind === "multi") {
+    return <span className={`${base} border border-ink-900 bg-sun-500 text-ink-900`}>{q.max ? `複数選択OK（${q.max}つまで）` : "複数選択OK"}</span>;
+  }
+  return null;
 }
 
 function QuestionBody({ q, answers, onAnswer }: { q: Question; answers: AnswersDraft; onAnswer: (patch: AnswersDraft, advance: boolean) => void }) {

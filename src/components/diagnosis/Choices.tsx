@@ -3,11 +3,12 @@
 import type { ReactNode } from "react";
 import type { Opt } from "@/lib/questions";
 
-function Check({ on }: { on: boolean }) {
+/** 1つ選ぶ質問は丸、複数選べる質問は四角のチェック */
+function Check({ on, square }: { on: boolean; square?: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition ${on ? "border-leaf-600 bg-leaf-600 text-white" : "border-sand-300 bg-white text-transparent"}`}
+      className={`grid h-6 w-6 shrink-0 place-items-center border-2 transition ${square ? "rounded-md" : "rounded-full"} ${on ? "border-leaf-600 bg-leaf-600 text-white" : "border-sand-300 bg-white text-transparent"}`}
     >
       <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none">
         <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -27,7 +28,7 @@ export function ChoiceButton({ on, onClick, children, sub, role = "radio" }: { o
         on ? "border-leaf-600 bg-leaf-50 " : "border-sand-200 bg-white hover:border-leaf-600/40 hover:bg-sand-50"
       }`}
     >
-      <Check on={on} />
+      <Check on={on} square={role === "checkbox"} />
       <span className="min-w-0">
         <span className="block font-semibold text-ink-900">{children}</span>
         {sub && <span className="mt-0.5 block text-xs text-ink-500">{sub}</span>}
