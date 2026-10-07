@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
  * SEO メディア「シゴトのものさし」(keitamiyamoto/AIcompany の site/、別の Vercel プロジェクト) を
  * ai-scouter.jp/media で配信する。メディア側も末尾スラッシュなしの URL で統一している。
  */
-const MEDIA_ORIGIN = (process.env.MEDIA_ORIGIN || "https://shigoto-media.vercel.app").replace(/\/+$/, "");
+const MEDIA_ORIGIN = (process.env.MEDIA_ORIGIN || "https://shigoto-monosashi.vercel.app").replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
