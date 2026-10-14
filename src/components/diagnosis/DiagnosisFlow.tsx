@@ -6,6 +6,7 @@ import { Button, Heading } from "@/components/ui";
 import { MultiChoice, SingleChoice } from "@/components/diagnosis/Choices";
 import { IncomeSlider, PrefecturePicker, SkillLevels } from "@/components/diagnosis/Inputs";
 import { ContactForm } from "@/components/diagnosis/ContactForm";
+import { ResultTeaser } from "@/components/diagnosis/ResultTeaser";
 import { Analyzing } from "@/components/diagnosis/Analyzing";
 import { QUESTIONS, SECTIONS, type Question } from "@/lib/questions";
 import { emptyContact, type AnswersDraft, type ContactDraft } from "@/lib/schemas";
@@ -147,10 +148,13 @@ export default function DiagnosisFlow() {
           </>
         ) : (
           <>
-            <p className="font-display text-sm font-bold text-leaf-700">あと少しで結果が出ます</p>
-            <Heading className="mt-1 text-2xl leading-snug sm:text-3xl">診断結果をお届けする連絡先を教えてください</Heading>
+            <p className="font-display text-sm font-bold text-leaf-700">診断がまとまりました</p>
+            <div className="mt-3">
+              <ResultTeaser answers={answers} />
+            </div>
+            <Heading className="mt-6 text-2xl leading-snug sm:text-3xl">続きの結果をお届けする連絡先を教えてください</Heading>
             <p className="mt-2 text-sm leading-relaxed text-ink-500">
-              結果はこのあとすぐ画面に表示されます。あなたに合う求人やキャリアのご相談のため、担当のキャリアアドバイザーからご連絡することがあります。
+              入力後すぐに、向いている職種トップ3と詳しい結果が画面に表示されます。あなたに合う求人やキャリアのご相談のため、担当のキャリアアドバイザーからご連絡することがあります。
             </p>
             <div className="mt-6">
               <ContactForm value={contact} onChange={setContact} errors={errors} honeypot={honeypot} onHoneypot={setHoneypot} />

@@ -205,6 +205,17 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
             <InterviewCta token={lead.token} leadId={lead.leadId} name={firstName} phone={lead.phone} requested={requested} dates={candidateDates()} />
           </section>
 
+          {/* 姉妹サービス (履歴書作る君) への案内。面談の案内より下に置き、面談申込の邪魔をしない */}
+          <a
+            href="https://aisupport-rirekisho.jp/start?type=CV&utm_source=aiscouter&utm_medium=referral&utm_campaign=result_cross"
+            className="block rounded-md border-2 border-sand-200 bg-white p-4 transition hover:border-leaf-600"
+          >
+            <p className="text-xs font-bold text-leaf-700">転職の準備に</p>
+            <p className="mt-1 font-display text-lg font-bold text-ink-900">職務経歴書もAIでかんたんに作れます</p>
+            <p className="mt-1 text-sm text-ink-500">質問に答えるだけで職務要約・自己PRの下書きができます。無料・会員登録なしで使えます。</p>
+            <p className="mt-2 text-sm font-bold text-leaf-700">AIサポート 履歴書作る君で作ってみる →</p>
+          </a>
+
           <p className="text-center text-xs leading-relaxed text-ink-500">
             ※ 診断結果は回答内容と一般的な求人相場をもとにした目安です。実際の年収や採用を保証するものではありません。
             <br />
