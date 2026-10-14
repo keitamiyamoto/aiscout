@@ -24,7 +24,8 @@ export function ResultTeaser({ answers }: { answers: AnswersDraft }) {
           {result.low}〜{result.high}
           <span className="ml-1 text-base">万円</span>
         </p>
-        {result.topPercent !== undefined && (
+        {/* 「上位◯%」は同年代の上半分のときだけ出す (下半分だと連絡先の入力をためらわせるため) */}
+        {result.topPercent !== undefined && result.topPercent <= 50 && (
           <p className="mt-1 text-sm text-ink-700">
             同年代の中で <span className="font-bold text-leaf-700">上位{result.topPercent}%</span>
           </p>
