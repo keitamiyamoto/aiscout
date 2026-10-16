@@ -30,7 +30,7 @@ describe("leadMessage", () => {
   it("面談申込の通知に連絡先・希望日・結果URLが入る", () => {
     const row = leadRow(lead, "面談申込", "https://ai-scouter.jp");
     const msg = leadMessage(row, "面談申込");
-    expect(msg).toContain("【面談申込】山田 太郎 さん");
+    expect(msg).toContain("[title]AIスカウター 【面談申込】山田 太郎 さん");
     expect(msg).toContain("090-1234-5678");
     expect(msg).toContain("10月2日(金)・10月5日(月)");
     expect(msg).toContain("夜 (18〜21時)");
@@ -41,7 +41,7 @@ describe("leadMessage", () => {
 
   it("診断完了の通知には面談の行が入らない", () => {
     const msg = leadMessage(leadRow(lead, "診断完了"), "診断完了");
-    expect(msg).toContain("【新規診断】");
+    expect(msg).toContain("[title]AIスカウター 【新規診断】");
     expect(msg).not.toContain("面談希望日");
   });
 

@@ -102,12 +102,16 @@ export function leadRow(l: LeadLike, kind: string, appUrl = process.env.APP_URL 
  * Chatwork に送る通知文。kind は「診断完了」か「面談申込」。
  * 行の値 (leadRow) から作るので、シートに書いた内容と通知の内容が必ず一致する。
  */
+/** Chatwork 通知のタイトルの先頭に付けるサービス名 */
+export const NOTIFY_PREFIX = "AIスカウター ";
+
 export function leadMessage(row: (string | number)[], kind: string): string {
   const r: Record<string, string> = {};
   LEAD_HEADERS.forEach((h, i) => (r[h] = String(row[i] ?? "")));
   const v = (key: string) => r[key] || "—";
   const isInterview = kind === "面談申込";
-  const title = isInterview ? `【面談申込】${v("氏名")} さん（オンライン面談）` : `【新規診断】${v("氏名")} さん`;
+  // 履歴書作る君と同じ Chatwork ルームに届くので、先頭にサービス名を付けて見分けられるようにする
+  const title = `${NOTIFY_PREFIX}${isInterview ? `【面談申込】${v("氏名")} さん（オンライン面談）` : `【新規診断】${v("氏名")} さん`}`;
   const lines = [
     `電話：${v("電話番号")}（つながりやすい時間：${v("連絡のつきやすい時間帯")}）`,
     `メール：${v("メールアドレス")}`,
