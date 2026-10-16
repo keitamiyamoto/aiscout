@@ -48,12 +48,19 @@ const checked = (max: number, check: (v: string) => string | null) =>
       if (message) ctx.addIssue({ code: "custom", message });
     });
 
+/**
+ * 連絡先。入力の手間で離脱する人が多かったため (2026-10-16、連絡先画面まで来た24人中1人しか送信しなかった)、
+ * 必須は お名前・電話番号・同意 だけにする。ふりがな・メール・時間帯は任意 (入れた場合だけ形式を確認)。
+ * 時間帯が未選択なら「いつでも」として扱う。
+ */
 export const contactSchema = z.object({
   name: checked(60, validateName),
-  nameKana: checked(60, (v) => (!v ? "ふりがなを入力してください" : isKana(v) ? null : "ふりがなはひらがな・カタカナで入力してください")),
+  nameKana: checked(60, (v) => (!v || isKana(v) ? null : "ふりがなはひらがな・カタカナで入力してください")),
   phone: checked(20, validatePhone),
-  email: checked(200, validateEmail),
-  contactTimes: z.array(z.enum(values("contactTimes"))).min(1, "連絡のつきやすい時間帯を1つ以上選んでください"),
+  email: checked(200, (v) => (v ? validateEmail(v) : null)),
+  contactTimes: z
+    .array(z.enum(values("contactTimes")))
+    .transform((t) => (t.length ? t : (["anytime"] as typeof t))),
   consent: z.literal(true, { error: "利用規約・プライバシーポリシーへの同意が必要です" }),
 });
 export type Contact = z.infer<typeof contactSchema>;

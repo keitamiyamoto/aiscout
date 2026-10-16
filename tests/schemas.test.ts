@@ -9,12 +9,23 @@ describe("contactSchema", () => {
     expect(contactSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("空の入力では全項目のエラーをまとめて返す", () => {
+  it("空の入力では必須項目 (お名前・電話番号・同意) のエラーだけを返す", () => {
     const r = contactSchema.safeParse({ name: "", nameKana: "", phone: "", email: "", contactTimes: [], consent: false });
     expect(r.success).toBe(false);
     const e = toFieldErrors(r.error!);
-    expect(Object.keys(e).sort()).toEqual(["consent", "contactTimes", "email", "name", "nameKana", "phone"]);
+    expect(Object.keys(e).sort()).toEqual(["consent", "name", "phone"]);
     expect(e.name).toBe("氏名を入力してください");
+  });
+
+  it("ふりがな・メール・時間帯は空でも通り、時間帯は「いつでも」になる", () => {
+    const r = contactSchema.safeParse({ ...valid, nameKana: "", email: "", contactTimes: [] });
+    expect(r.success).toBe(true);
+    expect(r.success && r.data.contactTimes).toEqual(["anytime"]);
+  });
+
+  it("メールを入れた場合は形式を確認する", () => {
+    const e = toFieldErrors(contactSchema.safeParse({ ...valid, email: "taro@" }).error!);
+    expect(e.email).toBeTruthy();
   });
 
   it("ふりがな・電話番号のいたずら入力を弾く", () => {

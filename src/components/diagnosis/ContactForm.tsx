@@ -32,20 +32,20 @@ export function ContactForm({
         <Field label="お名前" required error={errors.name}>
           <Input name="name" autoComplete="name" value={v.name} onChange={(e) => set({ name: e.target.value })} placeholder="山田 太郎" />
         </Field>
-        <Field label="ふりがな" required error={errors.nameKana}>
+        <Field label="ふりがな（任意）" error={errors.nameKana}>
           <Input name="nameKana" value={v.nameKana} onChange={(e) => set({ nameKana: e.target.value })} placeholder="やまだ たろう" />
         </Field>
       </div>
       <Field label="電話番号" required error={errors.phone} hint="ハイフンなしでもOKです">
         <Input name="phone" type="tel" inputMode="tel" autoComplete="tel" value={v.phone} onChange={(e) => set({ phone: e.target.value })} placeholder="09012345678" />
       </Field>
-      <Field label="メールアドレス" required error={errors.email}>
+      <Field label="メールアドレス（任意）" error={errors.email}>
         <Input name="email" type="email" inputMode="email" autoComplete="email" value={v.email} onChange={(e) => set({ email: e.target.value })} placeholder="you@example.com" />
       </Field>
       <div>
         <p className="mb-1.5 flex items-center gap-1 text-sm font-semibold text-ink-700">
-          連絡のつきやすい時間帯<span className="text-coral-600">*</span>
-          <span className="ml-1 text-xs font-normal text-ink-500">(複数選択可)</span>
+          連絡のつきやすい時間帯
+          <span className="ml-1 text-xs font-normal text-ink-500">(任意・複数選択可。選ばなければ「いつでも」)</span>
         </p>
         <div className="flex flex-wrap gap-2">
           {OPTIONS.contactTimes.map((o) => (
